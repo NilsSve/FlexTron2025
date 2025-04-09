@@ -1,0 +1,125 @@
+﻿Use cWebView.pkg
+Use cWebPanel.pkg
+Use cWebButton.pkg
+Use cWebGroup.pkg
+Use cWebForm.pkg
+Use cWebEdit.pkg
+Use cWebRadio.pkg
+Use cWebCombo.pkg
+Use cWebCheckBox.pkg
+Use cWebLabel.pkg
+Use cWebMenuGroup.pkg
+Use cWebMenuItem.pkg
+
+Use cDRAPI.Pkg
+
+// This example webview is the first part of the customer orders report. The customer order report shows the orders
+// of a specific or all customers. The results are shown in a second webview. This is done to give the maximum space
+// For the results in a webview.
+
+// The run report button in the webview will be hidden when running from a mobile device such as a tablet or phone. Running
+// a report is then possible via the run button in the actionbar.
+
+// All selection criteria and options are passed to the results view via the NamedValues member of the NavigateData parameter
+// of the OnGetNavigateForwardData event
+
+Object oCustomerOrdersReportSelect is a cWebView
+    Set psCaption to "CustomerOrders"
+    Set pbShowCaption to False
+    Set peWebViewStyle to wvsDrillDown
+
+    Object oWebMainPanel is a cWebPanel
+        Set piColumnCount to 12
+
+        Object oCustomerCustomerNumber is a cWebForm
+            Set piColumnSpan to 2
+            Set peLabelPosition to lpTop
+            Set peLabelAlign to alignLeft
+            Set psLabel to "Customer Number:"
+            Set psToolTip to "Select/Enter a customer number."
+            Set peDatatype to typeNumber
+            Set piMaxLength to 10
+            Set pbPromptButton to True
+
+            WebSetResponsive piColumnSpan rmMobilePortrait to 0
+            WebRegisterPath ntNavigateForward oSelectCustomer
+
+            Procedure OnPrompt
+                Send NavigatePath
+            End_Procedure
+
+            Procedure OnGetNavigateForwardData tWebNavigateData ByRef NavigateData Handle hoToView
+                Move nfFromChild to NavigateData.eNavigateType
+            End_Procedure
+
+            Procedure OnNavigateBack Handle hoCallback tWebNavigateData NavigateData
+                Boolean bFound
+                RowID riTable
+
+                Move (DeserializeRowId (NavigateData.sRowId)) to riTable
+                If (not (IsNullRowId (riTable))) Begin
+                    Move (FindByRowID (NavigateData.iTable, riTable)) to bFound
+                    WebSet psValue to Customer.Customer_Number
+                End
+            End_Procedure
+        End_Object
+
+        Object oRunButton is a cWebButton
+            Set psCaption to "Run Report"
+            Set piColumnSpan to 2
+
+            WebSetResponsive pbRender rmTablet to False
+
+            Procedure OnLoad
+                Forward Send OnLoad
+
+                Send SetActionMode (RefProc (OnClick)) scModeProgress "Please Wait for Report Results to be Generated and Downloaded to the Viewer..."
+            End_Procedure
+
+            Procedure OnClick
+                Send RunReport
+            End_Procedure
+        End_Object
+    End_Object
+
+    WebRegisterPath ntNavigateForward oCustomerOrdersReportResults
+
+    Procedure RunReport
+        Send NavigatePath
+    End_Procedure
+
+    Object oActionGroup is a cWebMenuGroup
+        Set psGroupName to "MainActions"
+
+        Object oRunReportMenuItem is a cWebMenuItem
+            Set psCaption to "Run Report"
+            Set psTooltip to "Run the report with selections"
+            Set psCSSClass to "RWRunReportButton"
+
+            WebSetResponsive peActionDisplay rmDesktop to adMenu
+            WebSetResponsive peActionDisplay rmTablet to adBoth
+
+            Procedure OnLoad
+                Forward Send OnLoad
+
+                Send SetActionMode (RefProc (OnClick)) scModeProgress "Please Wait for Report Results to be Generated and Downloaded to the Viewer..."
+            End_Procedure
+
+            Procedure OnClick
+                Send RunReport
+            End_Procedure
+        End_Object
+    End_Object
+
+    Procedure OnGetNavigateForwardData tWebNavigateData ByRef NavigateData
+        String sCustomerCustomerNumber
+        String sReportId
+
+        WebGet psValue of oCustomerCustomerNumber to sCustomerCustomerNumber
+
+        If (sCustomerCustomerNumber <> "") Begin
+            Get NamedValueAdd NavigateData.NamedValues "CustomerCustomerNumber" sCustomerCustomerNumber to NavigateData.NamedValues
+            Get NamedValueAdd NavigateData.NamedValues "CustomerCustomerNumberMode" C_drEqual to NavigateData.NamedValues
+        End
+    End_Procedure
+End_Object

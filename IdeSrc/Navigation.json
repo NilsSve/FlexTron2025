@@ -1,0 +1,328 @@
+{
+   "Projects": [
+     {
+       "nZoom": 0.35,
+       "nPositionX": -4985.14257813,
+       "nPositionY": 2099.71411133,
+       "nWidth": 3994.2855835,
+       "nHeight": 2754.28588867,
+       "sProject": "OrderMobile.src",
+       "bShowWebApp": false,
+       "bShowHidden": false,
+       "Elements": [
+         {
+           "Name": "oCustomerListReportSelect",
+           "Position": {
+             "sX": "-1650",
+             "sY": "3575"
+           },
+           "TabColor": {
+             "sColorDM": "#006EFF",
+             "sColorLM": "#006EFF"
+           },
+           "bHidden": false
+         },
+         {
+           "Name": "oDashboard",
+           "Position": {
+             "sX": "-4300",
+             "sY": "3875"
+           },
+           "TabColor": {
+             "sColorDM": "#002C68",
+             "sColorLM": "#97C6FF"
+           },
+           "bHidden": false
+         },
+         {
+           "Name": "oDemoCSSClasses",
+           "Position": {
+             "sX": "-4900",
+             "sY": "4000"
+           },
+           "TabColor": {
+             "sColorDM": "#002C68",
+             "sColorLM": "#97C6FF"
+           },
+           "bHidden": false
+         },
+         {
+           "Name": "oDemoCheckboxRadio",
+           "Position": {
+             "sX": "-4625",
+             "sY": "4200"
+           },
+           "TabColor": {
+             "sColorDM": "#672606",
+             "sColorLM": "#FFBFA3"
+           },
+           "bHidden": false
+         },
+         {
+           "Name": "oDemoCustomFwdNavigations",
+           "Position": {
+             "sX": "-3675",
+             "sY": "4225"
+           },
+           "TabColor": {
+             "sColorDM": "#9B3904",
+             "sColorLM": "#FF9F74"
+           },
+           "bHidden": false
+         },
+         {
+           "Name": "oDemoDialogs",
+           "Position": {
+             "sX": "-4900",
+             "sY": "4100"
+           },
+           "TabColor": {
+             "sColorDM": "#006EFF",
+             "sColorLM": "#006EFF"
+           },
+           "bHidden": false
+         },
+         {
+           "Name": "oDemoExpandPanel",
+           "Position": {
+             "sX": "-2500",
+             "sY": "3500"
+           },
+           "TabColor": {
+             "sColorDM": "#064F26",
+             "sColorLM": "#A3E8C0"
+           },
+           "bHidden": false
+         },
+         {
+           "Name": "oDemoGeoLocation",
+           "Position": {
+             "sX": "-4900",
+             "sY": "4200"
+           },
+           "TabColor": {
+             "sColorDM": "#00429B",
+             "sColorLM": "#63A9FF"
+           },
+           "bHidden": false
+         },
+         {
+           "Name": "oDemoSliders",
+           "Position": {
+             "sX": "-4900",
+             "sY": "3900"
+           },
+           "TabColor": {
+             "sColorDM": "#002C68",
+             "sColorLM": "#97C6FF"
+           },
+           "bHidden": false
+         },
+         {
+           "Name": "oDemoSwipableCards",
+           "Position": {
+             "sX": "-4625",
+             "sY": "4100"
+           },
+           "TabColor": {
+             "sColorDM": "#672606",
+             "sColorLM": "#FFBFA3"
+           },
+           "bHidden": false
+         },
+         {
+           "Name": "oMain",
+           "Position": {
+             "sX": "-5425",
+             "sY": "4575"
+           },
+           "TabColor": {
+             "sColorDM": "#672606",
+             "sColorLM": "#FFBFA3"
+           },
+           "bHidden": false
+         },
+         {
+           "Name": "oSelectCustomer",
+           "Position": {
+             "sX": "-1900",
+             "sY": "3300"
+           },
+           "TabColor": {
+             "sColorDM": "#06763A",
+             "sColorLM": "#74DCA0"
+           },
+           "bHidden": false
+         },
+         {
+           "Name": "oSelectInventory",
+           "Position": {
+             "sX": "-2900",
+             "sY": "2700"
+           },
+           "TabColor": {
+             "sColorDM": "#06763A",
+             "sColorLM": "#74DCA0"
+           },
+           "bHidden": false
+         },
+         {
+           "Name": "oSelectOrder",
+           "Position": {
+             "sX": "-3775",
+             "sY": "2875"
+           },
+           "TabColor": {
+             "sColorDM": "#03C560",
+             "sColorLM": "#03C560"
+           },
+           "bHidden": false
+         },
+         {
+           "Name": "oSelectOrdersByCustomer",
+           "Position": {
+             "sX": "-2500",
+             "sY": "3700"
+           },
+           "TabColor": {
+             "sColorDM": "#052713",
+             "sColorLM": "#D1F3E0"
+           },
+           "bHidden": false
+         },
+         {
+           "Name": "oSelectSalesPerson",
+           "Position": {
+             "sX": "-4050",
+             "sY": "2625"
+           },
+           "TabColor": {
+             "sColorDM": "#03C560",
+             "sColorLM": "#03C560"
+           },
+           "bHidden": false
+         },
+         {
+           "Name": "oSelectStandardComments",
+           "Position": {
+             "sX": "-2725",
+             "sY": "4125"
+           },
+           "TabColor": {
+             "sColorDM": "#06763A",
+             "sColorLM": "#74DCA0"
+           },
+           "bHidden": false
+         },
+         {
+           "Name": "oSelectValidationValue",
+           "Position": {
+             "sX": "-3025",
+             "sY": "4125"
+           },
+           "TabColor": {
+             "sColorDM": "#03C560",
+             "sColorLM": "#03C560"
+           },
+           "bHidden": false
+         },
+         {
+           "Name": "oSelectVendor",
+           "Position": {
+             "sX": "-2875",
+             "sY": "3100"
+           },
+           "TabColor": {
+             "sColorDM": "#064F26",
+             "sColorLM": "#A3E8C0"
+           },
+           "bHidden": false
+         },
+         {
+           "Name": "oZoomCustomer",
+           "Position": {
+             "sX": "-2150",
+             "sY": "3100"
+           },
+           "TabColor": {
+             "sColorDM": "#CE4C01",
+             "sColorLM": "#FF7F42"
+           },
+           "bHidden": false
+         },
+         {
+           "Name": "oZoomCustomerStatusHelp",
+           "Position": {
+             "sX": "-3325",
+             "sY": "4125"
+           },
+           "TabColor": {
+             "sColorDM": "#9B3904",
+             "sColorLM": "#FF9F74"
+           },
+           "bHidden": false
+         },
+         {
+           "Name": "oZoomInventory",
+           "Position": {
+             "sX": "-3175",
+             "sY": "2925"
+           },
+           "TabColor": {
+             "sColorDM": "#9B3904",
+             "sColorLM": "#FF9F74"
+           },
+           "bHidden": false
+         },
+         {
+           "Name": "oZoomOrder",
+           "Position": {
+             "sX": "-3500",
+             "sY": "2300"
+           },
+           "TabColor": {
+             "sColorDM": "#CE4C01",
+             "sColorLM": "#FF7F42"
+           },
+           "bHidden": false
+         },
+         {
+           "Name": "oZoomOrderDetail",
+           "Position": {
+             "sX": "-3175",
+             "sY": "2525"
+           },
+           "TabColor": {
+             "sColorDM": "#FF5E00",
+             "sColorLM": "#FF5E00"
+           },
+           "bHidden": false
+         },
+         {
+           "Name": "oZoomSalesPerson",
+           "Position": {
+             "sX": "-4375",
+             "sY": "2875"
+           },
+           "TabColor": {
+             "sColorDM": "#FF5E00",
+             "sColorLM": "#FF5E00"
+           },
+           "bHidden": false
+         },
+         {
+           "Name": "oZoomVendor",
+           "Position": {
+             "sX": "-3175",
+             "sY": "3275"
+           },
+           "TabColor": {
+             "sColorDM": "#0058CF",
+             "sColorLM": "#2B8CFF"
+           },
+           "bHidden": false
+         }
+       ]
+     }
+   ]
+ }

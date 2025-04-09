@@ -1,0 +1,243 @@
+﻿Use cWebView.pkg
+Use cWebPanel.pkg
+Use cWebButton.pkg
+Use cWebColumn.pkg
+Use cWebMenuGroup.pkg
+Use cWebMenuItem.pkg
+Use cWebLabel.pkg
+Use cWebColumnButton.pkg
+
+Use cVendorDataDictionary.dd
+Use cInventoryDataDictionary.dd
+
+Object oSelectInventory is a cWebView
+    Set piColumnCount to 7
+    Set psCaption to "Products"
+    Set pbShowCaption to False
+    Set peViewType to vtSelect
+    Set piMaxWidth to 1024
+    Set psStateViewName to "Inventory"
+    
+    WebSetResponsive piColumnCount rmTabletPortrait to 3
+    
+    Object oVendorDataDictionary is a cVendorDataDictionary
+    End_Object
+    
+    Object oInventoryDataDictionary is a cInventoryDataDictionary
+        Set DDO_Server to oVendorDataDictionary
+    End_Object
+    
+    Set Main_DD to oInventoryDataDictionary
+    Set Server  to oInventoryDataDictionary
+    
+    Set piColumnCount to 7
+    
+    Object oHeader is a cWebLabel
+        Set piColumnSpan to 0
+        Set psCaption to "Adding a new order line item. Start by selecting a product for this new line"
+        Set psCSSClass to "LabelDetail"
+    End_Object
+    
+    Object oList is a cWebList
+        Set piColumnSpan to 0
+        Set pbServerOnRowClick to True
+        Set pbFillHeight to True
+        Set psCSSClass to "MobileList"
+        Set piSortColumn to 0
+        Set pbShowHeader to False
+        
+        Object oInventoryItem_ID is a cWebColumn
+            Entry_Item Inventory.Item_ID
+            Set psCaption to "Item ID"
+            Set piWidth to 20
+            Set piListColSpan to 2
+            Set psCSSClass to "RowCaption"
+        End_Object
+        
+        Object oDetailButton is a cWebColumnButton
+            Set piWidth to 50
+            Set pbFixedWidth to True
+            Set psCaption to "btn"
+            Set pbResizable to False
+            Set piListRowSpan to 3
+            Set psBtnCssClass to "WebButtonIcon WebIcon_Info"
+            Set peAlign to alignRight
+            
+            WebRegisterPath ntNavigateForward oZoomInventory
+            
+            Procedure OnClick String sButton String sRowId
+                Send NavigatePath
+            End_Procedure
+            
+            Procedure OnGetNavigateForwardData tWebNavigateData ByRef NavigateData Handle hoToView
+                Move True to NavigateData.bReadOnly
+            End_Procedure
+        End_Object
+        
+        Object oInventoryDescription is a cWebColumn
+            Entry_Item Inventory.Description
+            Set psCaption to "Description"
+            Set piWidth to 80
+            Set pbNewLine to True
+            Set piListColSpan to 2
+        End_Object
+        
+        Object oInventoryOn_Hand is a cWebColumn
+            Entry_Item Inventory.On_Hand
+            Set psCaption to "On Hand"
+            Set pbNewLine to True
+            Set peAlign to alignLeft
+            Set psCSSClass to "RowDetail"
+        End_Object
+        
+        
+        Object oInventoryUnit_Price is a cWebColumn
+            Entry_Item Inventory.Unit_Price
+            Set psCaption to "Unit Price"
+            Set piWidth to 80
+            Set pbFixedWidth to True
+            Set psCSSClass to "RowDetail"
+        End_Object
+        
+        WebRegisterPath ntNavigateForward oZoomInventory
+        
+        Procedure OnRowClick String sRowID
+            tWebNavigateData NavigateData
+            Get GetNavigateData to NavigateData
+            
+            Case Begin
+                Case (NavigateData.eNavigateType=nfFromChild)
+                Case (NavigateData.eNavigateType=nfFromMain)
+                    // a child or main lookup
+                    Send NavigateClose Self
+                    Case Break
+                Case (NavigateData.eNavigateType=nfFromParent)
+                    // currently not used
+                    Case Break
+                Case Else
+                    Send NavigatePath
+            Case End
+            
+        End_Procedure
+    End_Object
+    
+    
+    Object oActionGroup is a cWebMenuGroup
+        
+        Object oSearch is a cWebMenuItem
+            Set psCaption to "Search"
+            Set psCSSClass to "WebPromptMenuItem"
+            
+            Procedure OnClick
+                Send Search of oList
+            End_Procedure
+            
+        End_Object
+        
+        Object oNewButton is a cWebMenuItem
+            Set psCaption to "New Product"
+            Set psCSSClass to "WebClearMenuItem"
+            
+            WebRegisterPath ntNavigateForward oZoomInventory Self "NewProduct"
+            
+            Procedure OnClick
+                Send NavigatePath
+            End_Procedure
+            
+            Procedure OnGetNavigateForwardData tWebNavigateData ByRef NavigateData Handle hoToView
+                Move True to NavigateData.bNewRecord
+            End_Procedure
+        End_Object
+        
+        Object oSearchOrderInventoryNumber is a cWebMenuItem
+            Set psCaption to "List by Product ID"
+            Set peActionDisplay to adMenu
+            Set pbBeginGroup to True
+            Procedure OnClick
+                WebSet piSortColumn of oList to 0
+                Send GridRefresh of oList
+            End_Procedure
+            
+        End_Object
+        
+        Object oSearchOrderInventoryName is a cWebMenuItem
+            Set psCaption to "List by Product Description"
+            Set peActionDisplay to adMenu
+            
+            Procedure OnClick
+                WebSet piSortColumn of oList to 2
+                Send GridRefresh of oList
+            End_Procedure
+            
+        End_Object
+        
+        Object oFindTop is a cWebMenuItem
+            Set psCaption to "Top"
+            Set peActionDisplay to adMenu
+            Set pbBeginGroup to True
+            
+            Procedure OnClick
+                Send MoveToFirstRow of oList
+            End_Procedure
+            
+        End_Object
+        
+        Object oFindLast is a cWebMenuItem
+            Set psCaption to "Bottom"
+            Set peActionDisplay to adMenu
+            
+            Procedure OnClick
+                Send MoveToLastRow of oList
+            End_Procedure
+            
+        End_Object
+        
+    End_Object
+    
+    
+    Procedure OnNavigateForward tWebNavigateData NavigateData Handle hoInvokingView Handle hoInvokingObject
+        Integer iMode iIndex
+        Handle hoView
+        Boolean bFound
+        String sValue sTask
+        
+        Get ViewObject to hoView
+        Move NavigateData.eNavigateType to iMode
+        WebSet pbRender of oNewButton to True
+        WebSet pbRender of oDetailButton to True
+        WebSet pbRender of oHeader to False
+        
+        Case Begin
+            Case (NavigateData.eNavigateType = nfFromMain)
+                // a main-file lookup
+                // not currently used
+                Case Break
+            Case (NavigateData.eNavigateType = nfFromChild)
+                // a parent lookup
+                Get NamedValueIndex NavigateData.NamedValues "InventoryHeader" to iIndex
+                If (iIndex<>-1) Begin
+                    WebSet pbRender of oHeader to True
+                    WebSet psCaption of oHeader to NavigateData.NamedValues[iIndex].sValue
+                End
+                Case Break
+            Case (NavigateData.eNavigateType = nfFromParent)
+                // a drill down query
+                // not currently used
+                Case Break
+            Case (NavigateData.eNavigateType = nfUndefined)
+                // simple maintenance select -> zoom
+                Get NamedValueGet NavigateData.NamedValues "task" to sTask
+                If (sTask="maint") Begin
+                    WebSet pbRender of oNewButton to True
+                    WebSet pbRender of oDetailButton to False
+                End
+                Else Begin
+                    // current not used
+                End
+        Case End
+    End_Procedure
+    
+    
+End_Object
+
+

@@ -1,0 +1,200 @@
+﻿Use cWebView.pkg
+Use cWebPanel.pkg
+Use cWebButton.pkg
+Use cWebColumn.pkg
+Use cWebMenuGroup.pkg
+Use cWebMenuItem.pkg
+Use cWebLabel.pkg
+
+Use cCustomerDataDictionary.dd
+Use cSalesPersonDataDictionary.dd
+Use cOrderHeaderDataDictionary.dd
+
+Register_Object oZoomOrder
+
+Object oSelectOrder is a cWebView
+    Set psCaption to "Orders"
+    Set pbShowCaption to False
+    Set piMaxWidth to 1024
+    Set piColumnCount to 6
+    Set peViewType to vtSelect
+    Set psStateViewName to "Orders"
+
+    WebSetResponsive piColumnCount rmTabletPortrait to 3
+
+    Object oCustomerDataDictionary is a cCustomerDataDictionary
+    End_Object
+
+    Object oSalesPersonDataDictionary is a cSalesPersonDataDictionary
+    End_Object
+
+    Object oOrderHeaderDataDictionary is a cOrderHeaderDataDictionary
+        Set DDO_Server to oCustomerDataDictionary
+        Set DDO_Server to oSalesPersonDataDictionary
+    End_Object
+
+    Set Main_DD to oOrderHeaderDataDictionary
+    Set Server  to oOrderHeaderDataDictionary
+
+    Object oHeader is a cWebLabel
+        Set psCaption to "Customer/SalesPerso Info" // will get filled in
+        Set psCSSClass to "LabelCaption"
+        Set piColumnSpan to 0
+    End_Object
+
+    Object oList is a cWebList
+        Set pbFillHeight to True
+        Set piColumnSpan to 0
+        Set pbServerOnRowClick to True
+        Set psCSSClass to "MobileList"
+        Set piSortColumn to 0
+        Set pbReverseOrdering to True
+        Set pbShowHeader to False
+        Set psPlaceHolder to "No orders"
+
+        Object oOrderHeaderOrder_Number is a cWebColumn
+            Entry_Item OrderHeader.Order_Number
+            Set psCaption to "Order Number"
+            Set piWidth to 80
+
+            Set psCSSClass to "RowCaption"
+            Set peAlign to alignLeft
+        End_Object
+
+        Object oOrderDate is a cWebColumn
+            Entry_Item OrderHeader.Order_Date
+            Set psCaption to "Order Date"
+            Set psCSSClass to "RowCaption"
+            Set piWidth to 110
+            Set pbFixedWidth to True
+        End_Object
+
+        Object oOrderHeaderOrder_Total is a cWebColumn
+            Entry_Item OrderHeader.Order_Total
+            Set psCaption to "Price"
+            Set piWidth to 100
+            Set peAlign to alignRight
+            Set psCSSClass to "RowCaption"
+        End_Object
+
+        Object oCustomer_Name is a cWebColumn
+            Set psCaption to "Customer Name"
+            Set piWidth to 150
+            Set piListColSpan to 3
+            Set pbNewLine to True
+            Entry_Item Customer.Name
+        End_Object
+
+        Object oSalesPName is a cWebColumn
+            Set psCaption to "Sales Person"
+            Set piWidth to 262
+            Set piListColSpan to 3
+            Set pbNewLine to True
+            Set psCSSClass to "RowDetail"
+            Procedure OnSetCalculatedValue String ByRef sValue
+                Move ("by: " + Trim(SalesPerson.ID) + " - " + Trim(SalesPerson.Name)) to sValue
+            End_Procedure
+        End_Object
+
+        WebRegisterPath ntNavigateForward oZoomOrder
+
+        Procedure OnRowClick String sRowID
+            tWebNavigateData NavigateData
+
+            Get GetNavigateData to NavigateData
+            If (NavigateData.eNavigateType = nfFromChild) Begin
+                Send NavigateClose Self
+            End
+            Else Begin
+                Send NavigatePath
+            End
+        End_Procedure
+
+        Procedure OnGetNavigateForwardData tWebNavigateData ByRef NavigateData Handle hoToView
+            Move True to NavigateData.bReadOnly
+        End_Procedure
+    End_Object
+
+
+    Object oActionGroup is a cWebMenuGroup
+
+        Object oSearch is a cWebMenuItem
+            Set psCaption to "Search"
+            Set psCSSClass to "WebPromptMenuItem"
+
+            Procedure OnClick
+                Send Search of oList
+            End_Procedure
+        End_Object
+
+        Object oNewButton is a cWebMenuItem
+            Set psCaption to "New Order"
+            Set psCSSClass to "WebClearMenuItem"
+        
+            WebRegisterPath ntNavigateForward oZoomOrder Self "NewOrder"
+            
+            Procedure OnClick
+                Send NavigatePath
+            End_Procedure
+        
+            Procedure OnGetNavigateForwardData tWebNavigateData ByRef NavigateData Handle hoToView
+                Move True to NavigateData.bNewRecord
+            End_Procedure
+        End_Object
+
+
+        Object oFindTop is a cWebMenuItem
+            Set psCaption to "Top"
+            Set peActionDisplay to adMenu
+            Set pbBeginGroup to True
+
+            Procedure OnClick
+                Send MoveToFirstRow of oList
+            End_Procedure
+
+        End_Object
+
+        Object oFindLast is a cWebMenuItem
+            Set psCaption to "Bottom"
+            Set peActionDisplay to adMenu
+
+            Procedure OnClick
+                Send MoveToLastRow of oList
+            End_Procedure
+
+        End_Object
+    End_Object
+
+    Procedure OnNavigateForward tWebNavigateData NavigateData Handle hoInvokingView Handle hoInvokingObject
+        String sCaption
+
+        Send SetBreadcrumbCaption "Orders"
+        Send SetHeaderCaption     "Orders Select"
+        WebSet pbRender of oCustomer_Name to True
+        WebSet pbRender of oSalesPName to True
+        WebSet pbRender of oHeader to False
+
+        If (NavigateData.eNavigateType=nfFromParent) Begin
+            WebSet peDbGridType of oList to gtAllData
+            WebSet pbRender of oHeader to True
+
+            If (NavigateData.iTable = RefTable(Customer)) Begin
+                Send SetHeaderCaption "Customer Orders Select"
+                WebSet psCaption of oHeader to ("Customer: " + Trim(Customer.Name))
+                WebSet pbRender of oCustomer_Name to False
+            End
+            Else Begin
+                Send SetHeaderCaption "Sales Person Orders Select"
+                WebSet psCaption of oHeader to ("Sales Person: " + SalesPerson.ID * "-" * SalesPerson.Name)
+                WebSet pbRender of oSalesPName to False
+            End
+        End
+        Else Begin
+            WebSet peDbGridType of oList to gtAutomatic
+        End
+    End_Procedure
+
+End_Object
+
+
+

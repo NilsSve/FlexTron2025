@@ -1,0 +1,170 @@
+﻿Use cWebView.pkg
+Use cWebPanel.pkg
+Use cWebForm.pkg
+Use cWebMenuGroup.pkg
+Use cWebMenuItem.pkg
+
+Use cVendorDataDictionary.dd
+Use cInventoryDataDictionary.dd
+
+Object oZoomInventory is a cWebView
+    Set psCaption to "Product"
+    Set pbShowCaption to False
+    Set piMaxWidth to 1024
+    Set peViewType to vtZoom
+    Set Verify_Save_msg to 0
+    Set psStateViewName to "Product"
+
+    Object oVendorDataDictionary is a cVendorDataDictionary
+    End_Object
+
+    Object oInventoryDataDictionary is a cInventoryDataDictionary
+        Set DDO_Server to oVendorDataDictionary
+    End_Object
+
+    Set Main_DD to oInventoryDataDictionary
+    Set Server  to oInventoryDataDictionary
+
+    Object oWebMainPanel is a cWebPanel
+        WebSetResponsive piColumnCount rmMobile to 6
+        Set piColumnCount to 12
+
+        Object oInventoryItem_ID is a cWebForm
+            Entry_Item Inventory.Item_ID
+            Set piColumnSpan to 3
+            Set piColumnIndex to 0
+            Set psLabel to "Item ID"
+            Set peLabelPosition to lpTop
+        End_Object
+
+        Object oInventoryDescription is a cWebForm
+            Entry_Item Inventory.Description
+            Set piColumnSpan to 6
+            Set piColumnIndex to 3
+            Set psLabel to "Description"
+            Set peLabelPosition to lpTop
+        End_Object
+
+        Object oVendorID is a cWebForm
+            Entry_Item Vendor.ID
+            Set piColumnSpan to 3
+            Set piColumnIndex to 0
+            Set peAlign to alignLeft
+            Set psLabel to "Vendor ID"
+            Set peLabelPosition to lpTop
+            Set pbPromptButton to True
+
+            WebRegisterPath ntNavigateForward oSelectVendor Self "VendorById"
+
+            Procedure OnPrompt
+                Send NavigatePath
+            End_Procedure
+        End_Object
+
+        Object oVendorName is a cWebForm
+            Entry_Item Vendor.Name
+            Set piColumnSpan to 6
+            Set piColumnIndex to 0
+            Set psLabel to "Vendor Name"
+            Set peLabelPosition to lpTop
+            Set pbPromptButton to True
+
+            WebRegisterPath ntNavigateForward oSelectVendor Self "VendorByName"
+
+            Procedure OnPrompt
+                Send NavigatePath
+            End_Procedure
+        End_Object
+
+        Object oInventoryVendor_Part_ID is a cWebForm
+            Entry_Item Inventory.Vendor_Part_ID
+            Set piColumnSpan to 5
+            Set piColumnIndex to 0
+            Set psLabel to "Vendor Part ID"
+            Set peLabelPosition to lpTop
+        End_Object
+
+        Object oInventoryUnit_Price is a cWebForm
+            Entry_Item Inventory.Unit_Price
+            Set piColumnSpan to 3
+            Set piColumnIndex to 0
+            Set psLabel to "Unit Price"
+            Set peLabelPosition to lpTop
+        End_Object
+
+        Object oInventoryOn_Hand is a cWebForm
+            Entry_Item Inventory.On_Hand
+            Set piColumnSpan to 2
+            Set piColumnIndex to 0
+            Set psLabel to "Qty On Hand"
+            Set peLabelPosition to lpTop
+            Set peAlign to alignLeft
+        End_Object
+    End_Object
+
+    Procedure SetActionButtons
+        String sCaption
+        Integer iMode
+        tWebNavigateData NavigateData
+        Get GetNavigateData to NavigateData
+        Move NavigateData.eNavigateType to iMode
+
+        WebSet pbRender of oEditBtn to False
+        WebSet pbRender of oSaveBtn to False
+
+        If (iMode= nfFromMain or iMode=nfFromChild) Begin
+            If (NavigateData.bReadOnly) Begin
+                WebSet pbRender of oEditBtn to True
+            End
+            Else Begin
+                WebSet pbRender of oSaveBtn to True
+            End
+        End
+    End_Procedure
+
+    Object oActionGroup is a cWebMenuGroup
+
+        Object oSaveBtn is a cWebMenuItem
+            Set psCaption to "Save"
+            Set psCSSClass to "WebSaveMenuItem"
+
+            Procedure OnClick
+                Send Request_Save
+            End_Procedure
+        End_Object
+
+        Object oEditBtn is a cWebMenuItem
+            Set psCaption to "Edit"
+            Set psCSSClass to "WebEditMenuItem"
+
+            Procedure OnClick
+                Send ChangeEditMode True
+                Send SetActionButtons
+            End_Procedure
+        End_Object
+    End_Object
+
+    Procedure OnViewSaved Handle hoServer Boolean bChanged
+        Send NavigateClose Self
+    End_Procedure
+
+    Procedure OnNavigateForward tWebNavigateData NavigateData Handle hoInvokingView Handle hoInvokingObject
+        String sCaption
+        Integer iMode
+        Move NavigateData.eNavigateType to iMode
+        If (iMode= nfFromMain or iMode=nfFromChild) Begin
+            If (HasRecord(Server(Self))) Begin
+                Send SetBreadcrumbCaption ("Product" * String(Inventory.Item_ID))
+            End
+            Else Begin
+                Send SetBreadCrumbCaption "New Product"
+            End
+        End
+
+        Send SetActionButtons
+
+    End_Procedure
+
+End_Object
+
+

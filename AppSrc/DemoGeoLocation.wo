@@ -1,0 +1,180 @@
+﻿Use cWebView.pkg
+Use cWebPanel.pkg
+Use cWebForm.pkg 
+Use cWebGeoLocation.pkg
+Use cWebButton.pkg
+Use cWebGroup.pkg
+Use cWebProgressBar.pkg
+Use cWebHtmlBox.pkg
+Use cWebLabel.pkg
+
+Object oDemoGeoLocation is a cWebView
+    Set piMaxWidth to 700
+    Set psCaption to "GeoLocation API Demo"
+
+    // Your DDO structure will go here
+
+    Object oWebMainPanel is a cWebPanel
+        Set piColumnCount to 12
+
+        Object oWebHtmlBox3 is a cWebHtmlBox
+            Set piColumnSpan to 0
+            Set psHtml to "<p>This view demonstrates the <b>cWebGeoLocation</b> class that can be used to query the browser for the current location. The location is represented in GPS coordinates and an accuracy indicator is included. For privacy reasons the user has to allow the browser to provide this information to the web application. If this is not allowed <b>OnError</b> will be triggered.</p><p>Note that some browsers only allow the location to be shared with secure origins (pages that are loaded via HTTPS)!</p>"
+        End_Object
+        
+        Object oQueryOnceGrp is a cWebGroup
+            Set psCaption to "Query location"
+            Set piColumnCount to 12   
+
+            Object oWebHtmlBox1 is a cWebHtmlBox
+                Set piColumnSpan to 0
+                Set psHtml to "The button below demonstrates how to use the <b>QueryLocation</b> procedure. This procedure asks the browser for the current location using the <i>navigator.geolocation.getCurrentPosition</i> API. Note that this procedure works asynchronously and you have to pass it a handler function that will receive the location as parameters."
+            End_Object
+            
+            Object oWebGeoLocation1 is a cWebGeoLocation
+            End_Object
+
+            Object oQueryOnceBtn is a cWebButton
+                Set piColumnSpan to 3
+                Set psCaption to "Show location"
+                
+                Procedure GeoQuery_Callback Integer iErr Number nLatitude Number nLongitude Number nAccuracy Number nSpeed Number nHeading
+                    If (not(iErr)) Begin
+                        Send ShowInfoBox (SFormat("Lat: %1 Long: %2 Acc: %3 Speed: %4 Head: %5", nLatitude, nLongitude, nAccuracy, nSpeed, nHeading))
+                    End
+                End_Procedure
+                
+                WebPublishProcedure GeoQuery_Callback
+                
+                Procedure OnClick
+                    Send QueryLocation of oWebGeoLocation1 (RefProc(GeoQuery_Callback)) Self
+                End_Procedure
+                
+                WebSetResponsive piColumnSpan rmMobile to 6
+            End_Object
+        End_Object
+
+        Object oTrackGrp is a cWebGroup
+            Set psCaption to "Track location"
+            Set piColumnCount to 12   
+            
+            Object oWebHtmlBox2 is a cWebHtmlBox
+                Set piColumnSpan to 0
+                Set psHtml to "The <b>cWebGeoLocation</b> class can track the location using the <i>navigator.geolocation.watchPosition</i> browser API. This is controlled by <b>pbTracking</b>, <b>pbAutoStart</b> & <b>pbAutoStop</b> or the <b>Start</b> and <b>Stop</b> messages. When tracking is enabled the <b>OnLocationChange</b> event will fire whenever the browser indicates a new location. Click the button below to start tracking the current location."
+            End_Object
+            
+            Object oWebGeoLocation2 is a cWebGeoLocation
+                { WebProperty=Server }
+                Property Integer piCount 0
+                
+                Procedure OnLocationChange Number nLatitude Number nLongitude Number nAccuracy Number nSpeed Number nHeading
+                    Integer iCount
+                    
+                    WebSet psValue of oLatFrm to nLatitude    
+                    WebSet psValue of oLongFrm to nLongitude
+                    WebSet piValue of oAccuracyBar to (Round(150.0 - nAccuracy) max 0)
+                    WebSet psCaption of oAccuracyBar to (String(nAccuracy) + " m")
+                    WebSet psValue of oSpeedFrm to nSpeed
+                    WebSet psValue of oHeadingFrm to nHeading
+                    
+                    WebGet piCount to iCount
+                    Increment iCount
+                    WebSet piCount to iCount
+                    WebSet psValue of oCountFrm to iCount
+                    
+                    WebSet pnSpeed to 232.1
+                    WebSet pbRender of oErrorLbl to False
+                End_Procedure
+
+                Procedure OnError Integer iCode String sMessage
+                    WebSet pbRender of oErrorLbl to True
+                    WebSet psCaption of oErrorLbl to ("Error: " + sMessage)
+                End_Procedure
+            End_Object
+
+            Object oLatFrm is a cWebForm
+                Set piColumnSpan to 0
+                Set psLabel to "Latitude:"
+                Set peDataType to typeNumber
+                Set pbReadOnly to True
+                Set psValue to "0"
+            End_Object
+            
+            Object oLongFrm is a cWebForm
+                Set piColumnSpan to 0
+                Set psLabel to "Longitude:"
+                Set peDataType to typeNumber
+                Set pbReadOnly to True
+                Set psValue to "0"
+            End_Object
+
+            Object oAccuracyBar is a cWebProgressBar
+                Set psLabel to "Accuracy:"
+                Set pbShowLabel to True
+                Set piMaxValue to 150
+                Set psCaption to "0 m"
+            End_Object
+            
+            Object oSpeedFrm is a cWebForm
+                Set piColumnSpan to 0
+                Set psLabel to "Speed:"
+                Set peDataType to typeNumber
+                Set pbReadOnly to True
+                Set psValue to "0"
+            End_Object
+            
+            Object oHeadingFrm is a cWebForm
+                Set piColumnSpan to 0
+                Set psLabel to "Heading:"
+                Set peDataType to typeNumber
+                Set pbReadOnly to True
+                Set psValue to "0"
+            End_Object
+            
+            Object oCountFrm is a cWebForm
+                Set piColumnSpan to 0
+                Set psLabel to "Count:"
+                Set peDataType to typeNumber
+                Set pbReadOnly to True
+                Set psValue to "0"
+            End_Object
+
+            Object oStartStopBtn is a cWebButton
+                Set piColumnSpan to 3
+                Set psCaption to "Start"
+            
+                Procedure OnClick
+                    Boolean bTracking
+                    
+                    WebGet pbTracking of oWebGeoLocation2 to bTracking
+                    
+                    If (bTracking) Begin
+                        Send Stop of oWebGeoLocation2
+                        WebSet psCaption to "Start"
+                    End
+                    Else Begin
+                        Send Start of oWebGeoLocation2
+                        WebSet psCaption to "Stop"
+                    End
+                End_Procedure
+                
+                WebSetResponsive piColumnSpan rmMobile to 6
+            End_Object
+
+            Object oErrorLbl is a cWebLabel
+                Set psCaption to "Error: <text>"
+                Set peAlign to alignCenter
+                Set piColumnSpan to 0
+                Set psCSSClass to "LoginWarning"
+                Set piColumnIndex to 3
+                Set pbRender to False
+                
+                WebSetResponsive piColumnIndex rmMobile to 0
+            End_Object
+            
+        End_Object
+        
+        
+    End_Object 
+
+End_Object

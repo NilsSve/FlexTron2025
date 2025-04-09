@@ -1,0 +1,187 @@
+﻿Use cWebView.pkg
+Use cWebPanel.pkg
+Use cWebForm.pkg
+Use cWebCombo.pkg
+Use cWebMenuGroup.pkg
+Use cWebMenuItem.pkg
+
+Use cVendorDataDictionary.DD
+
+Object oZoomVendor is a cWebView
+    Set psCaption to "Vendor"
+    Set pbShowCaption to False
+    Set piMaxWidth to 1024
+    Set Verify_Save_msg to 0
+    Set psStateViewName to "Vendor"
+    
+    Object oVendorDataDictionary is a cVendorDataDictionary
+    End_Object
+    
+    Set Main_DD to oVendorDataDictionary
+    Set Server  to oVendorDataDictionary
+    
+    
+    Object oWebMainPanel is a cWebPanel
+        Set piColumnCount to 12
+        WebSetResponsive piColumnCount rmMobile to 6
+        
+        Object oVendorID is a cWebForm
+            Entry_Item Vendor.ID
+            Set piColumnSpan to 2
+            Set piColumnIndex to 0
+            Set psLabel to "ID"
+            Set peLabelPosition to lpTop
+            Set peAlign to alignLeft
+            Set psPlaceHolder to "New"
+        End_Object
+        
+        Object oVendorName is a cWebForm
+            Entry_Item Vendor.Name
+            Set piColumnSpan to 6
+            Set piColumnIndex to 0
+            Set psLabel to "Name"
+            Set peLabelPosition to lpTop
+        End_Object
+        
+        Object oVendorAddress is a cWebForm
+            Entry_Item Vendor.Address
+            Set piColumnSpan to 10
+            Set piColumnIndex to 0
+            Set psLabel to "Street"
+            Set peLabelPosition to lpTop
+        End_Object
+        
+        Object oVendorCity is a cWebForm
+            Entry_Item Vendor.City
+            Set piColumnSpan to 5
+            Set piColumnIndex to 0
+            Set psLabel to "City"
+            Set peLabelPosition to lpTop
+        End_Object
+        
+        Object oVendorState is a cWebCombo
+            Entry_Item Vendor.State
+            Set piColumnSpan to 3
+            Set piColumnIndex to 5
+            Set psLabel to "State"
+            Set peLabelPosition to lpTop
+        End_Object
+        
+        Object oVendorZip is a cWebForm
+            Entry_Item Vendor.Zip
+            Set piColumnSpan to 2
+            Set piColumnIndex to 8
+            Set psLabel to "Zip"
+            Set peLabelPosition to lpTop
+        End_Object
+        
+        Object oVendorPhone_Number is a cWebForm
+            Entry_Item Vendor.Phone_Number
+            Set piColumnSpan to 5
+            Set piColumnIndex to 0
+            Set psLabel to "Phone"
+            Set peLabelPosition to lpTop
+        End_Object
+        
+        Object oVendorFax_Number is a cWebForm
+            Entry_Item Vendor.Fax_Number
+            Set piColumnSpan to 5
+            Set piColumnIndex to 0
+            Set psLabel to "Fax"
+            Set peLabelPosition to lpTop
+        End_Object
+    End_Object
+    
+    Object oActionGroup is a cWebMenuGroup
+        
+        Object oSaveBtn is a cWebMenuItem
+            Set psCaption to "Save"
+            Set psCSSClass to "WebSaveMenuItem"
+            
+            Procedure OnClick
+                Send Request_Save
+            End_Procedure
+        End_Object
+        
+        Object oEditBtn is a cWebMenuItem
+            Set psCaption to "Edit"
+            Set psCSSClass to "WebEditMenuItem"
+            Procedure OnClick
+                Send ChangeEditMode True
+                Send SetActionButtons
+            End_Procedure
+        End_Object
+        
+        Object oDeleteBtn is a cWebMenuItem
+            Set psCaption to "Delete"
+            Set psCSSClass to "WebDeleteMenuItem"
+            Set peActionDisplay to adMenu
+            
+            Procedure OnClick
+                Send Request_Delete
+            End_Procedure
+        End_Object
+        
+        Object oCancelChangesBtn is a cWebMenuItem
+            
+            Set psCaption to "Clear Changes"
+            Set peActionDisplay to adMenu
+            
+            Procedure OnClick
+                Send RefreshRecord
+            End_Procedure
+        End_Object
+        
+    End_Object
+    
+    Procedure SetActionButtons
+        tWebNavigateData NavigateData
+        Boolean bHasRecord
+        Handle hoDD
+        
+        Get Server to hoDD
+        Get GetNavigateData to NavigateData
+        Get HasRecord of hoDD to bHasRecord
+        
+        WebSet pbRender of oEditBtn to False
+        WebSet pbRender of oSaveBtn to False
+        WebSet pbRender of oCancelChangesBtn to False
+        WebSet pbRender of oDeleteBtn to False
+        
+        If (NavigateData.bReadOnly) Begin
+            WebSet pbRender of oEditBtn to True
+        End
+        Else Begin
+            WebSet pbRender of oSaveBtn to True
+            WebSet pbRender of oCancelChangesBtn to True
+            WebSet pbRender of oDeleteBtn to bHasRecord
+        End
+    End_Procedure
+    
+    
+    Procedure OnViewSaved Handle hoServer Boolean bChanged
+        Send NavigateClose Self
+    End_Procedure
+    
+    Procedure OnViewDeleted Handle hoDDO
+        Send NavigateClose Self
+    End_Procedure
+    
+    
+    Procedure OnNavigateForward tWebNavigateData NavigateData Handle hoInvokingView Handle hoInvokingObject
+        If (NavigateData.eNavigateType= nfFromMain or NavigateData.eNavigateType=nfFromChild) Begin
+            If (HasRecord(Server(Self))) Begin
+                Send SetBreadcrumbCaption (Trim(Vendor.Name))
+            End
+            Else Begin
+                Send SetBreadcrumbCaption "New Vendor"
+            End
+        End
+        
+        Send SetActionButtons
+        
+    End_Procedure
+    
+End_Object
+
+

@@ -1,0 +1,99 @@
+﻿Use cWebModalDialog.pkg
+Use cWebPanel.pkg
+Use cWebButton.pkg
+Use cWebPromptList.pkg
+Use cWebColumn.pkg
+
+Use cVendorDataDictionary.dd
+
+Object oVendorWebLookup is a cWebModalDialog
+    Set piColumnCount to 8
+    Set psCaption to "Vendor Lookup List"
+    Set piWidth to 700
+    Set piHeight to 400
+    
+    Object oVendorDataDictionary is a cVendorDataDictionary
+    End_Object
+    
+    Set Main_DD to oVendorDataDictionary
+    Set Server  to oVendorDataDictionary
+    
+    
+    Object oWebMainPanel is a cWebPanel
+        Set piColumnCount to 8
+        
+        Object oPromptList is a cWebPromptList
+            Set pbFillHeight to True
+            Set piColumnSpan to 8
+            
+            // Since there is only a few records, we set this property so all records are sent to
+            // the client at once. This improves the performance of scrolling and searching and
+            // enables sorting on all columns.
+            Set peDbGridType to gtAllData
+            
+            Object oVendorID is a cWebColumn
+                Entry_Item Vendor.ID
+                Set psCaption to "Vndr ID"
+                Set piWidth to 63
+            End_Object
+            
+            Object oVendorName is a cWebColumn
+                Entry_Item Vendor.Name
+                Set psCaption to "Name"
+                Set piWidth to 315
+            End_Object
+            
+            Object oVendorCity is a cWebColumn
+                Entry_Item Vendor.City
+                Set psCaption to "City"
+                Set piWidth to 147
+            End_Object
+        End_Object
+        
+        Object oOkButton is a cWebButton
+            Set psCaption to "OK"
+            Set piColumnSpan to 1
+            Set piColumnIndex to 5
+            
+            Procedure OnClick
+                Send Ok of oPromptList
+            End_Procedure
+            
+        End_Object
+        
+        Object oCancelButton is a cWebButton
+            Set psCaption to "Cancel"
+            Set piColumnSpan to 1
+            Set piColumnIndex to 6
+            Procedure OnClick
+                Send Cancel of oPromptList
+            End_Procedure
+            
+        End_Object
+        
+        Object oSearchButton is a cWebButton
+            Set psCaption to "Search..."
+            Set piColumnSpan to 1
+            Set piColumnIndex to 7
+            
+            Procedure OnClick
+                Send Search of oPromptList
+            End_Procedure
+            
+        End_Object
+    End_Object
+    
+    Procedure Popup Handle hoReturnObject
+        Forward Send Popup hoReturnObject
+        
+        Send InitializePromptList of oPromptList
+    End_Procedure
+    
+    Set pbServerOnSubmit to True
+    Procedure OnSubmit
+        Send Ok of oPromptList
+    End_Procedure
+    
+End_Object
+
+

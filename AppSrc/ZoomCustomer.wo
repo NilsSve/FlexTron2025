@@ -1,0 +1,297 @@
+﻿Use cWebPanel.pkg
+Use cWebForm.pkg
+Use cWebCheckBox.pkg
+Use cWebGroup.pkg
+Use cWebCombo.pkg
+Use cWebEdit.pkg
+Use cWebMenuGroup.pkg
+Use cWebMenuItem.pkg
+Use cWebButton.pkg
+Use cWebSpacer.pkg
+Use cWebView.pkg
+Use cWebLabel.pkg
+
+Use cCustomerDataDictionary.dd
+
+Register_Object oSelectOrder
+
+Object oZoomCustomer is a cWebView
+    Set peViewType to vtZoom
+    Set psCaption to "Customer Maintenance"
+    Set pbShowCaption to False
+    Set piMaxWidth to 1024
+    Set Verify_Save_msg to 0
+    Set psStateViewName to "Customer"
+    
+    Object oCustomerDataDictionary is a cCustomerDataDictionary
+    End_Object
+    
+    Set Main_DD to oCustomerDataDictionary
+    Set Server  to oCustomerDataDictionary
+    
+    Object oWebMainPanel is a cWebPanel
+        Set piColumnCount to 12
+        WebSetResponsive piColumnCount rmMobile to 6
+        
+        
+        Object oCustomerNumber is a cWebForm
+            Entry_Item Customer.Customer_Number
+            Set piColumnSpan to 4
+            Set psLabel to "Customer #"
+            Set pbPromptButton to True
+            Set piLabelOffset to 90
+            Set psPlaceHolder to "New"
+            
+            WebSetResponsive piColumnSpan rmMobile to 2
+            WebSetResponsive peLabelPosition rmMobile to lpTop
+            WebSetResponsive piLabelOffset rmMobile to 0
+            
+            WebRegisterPath ntNavigateForward oSelectCustomer
+            
+            Procedure Prompt
+                Send NavigatePath
+            End_Procedure
+        End_Object
+        
+        Object oCustomerStatus is a cWebCheckBox
+            Entry_Item Customer.Status
+            Set psCaption to "Active Customer"
+            Set piColumnSpan to 5
+            Set piColumnIndex to 6
+            Set pbShowLabel to False
+            Set piLabelOffset to 0
+            
+            WebSetResponsive pbShowLabel rmMobile to True
+            WebSetResponsive peLabelPosition rmMobile to lpTop
+            WebSetResponsive piColumnIndex rmMobile to 3
+            WebSetResponsive piColumnSpan rmMobile to 3
+        End_Object
+        
+        Object oCustomerName is a cWebForm
+            Entry_Item Customer.Name
+            Set piColumnSpan to 8
+            Set psLabel to "Name"
+            Set piLabelOffset to 90
+            Set pbPromptButton to False
+            
+            WebSetResponsive peLabelPosition rmMobile to lpTop
+            WebSetResponsive piLabelOffset rmMobile to 0
+        End_Object
+        
+        Object oAddress_group is a cWebGroup
+            Set piColumnCount to 12
+            Set piColumnSpan to 6
+            Set psCaption to "Address"
+            
+            WebSetResponsive piColumnCount rmMobile to 1
+            
+            Object oCustomerAddress is a cWebForm
+                Entry_Item Customer.Address
+                Set piColumnSpan to 0
+                Set psLabel to "Street"
+                Set piLabelOffset to 75
+                
+                WebSetResponsive peLabelPosition rmMobile to lpTop
+                WebSetResponsive piLabelOffset rmMobile to 0
+            End_Object
+            
+            Object oCustomerCity is a cWebForm
+                Entry_Item Customer.City
+                Set psLabel to "City"
+                Set piColumnSpan to 9
+                Set piLabelOffset to 75
+                
+                WebSetResponsive peLabelPosition rmMobile to lpTop
+                WebSetResponsive piLabelOffset rmMobile to 0
+            End_Object
+            
+            Object oCustomerState is a cWebCombo
+                Entry_Item Customer.State
+                Set piColumnSpan to 9
+                Set piLabelOffset to 75
+                Set psLabel to "State"
+                
+                WebSetResponsive peLabelPosition rmMobile to lpTop
+                WebSetResponsive piLabelOffset rmMobile to 0
+            End_Object
+            
+            Object oCustomerZip is a cWebForm
+                Entry_Item Customer.Zip
+                Set piColumnSpan to 9
+                Set piLabelOffset to 75
+                Set psLabel to "Zip"
+                
+                WebSetResponsive peLabelPosition rmMobile to lpTop
+                WebSetResponsive piLabelOffset rmMobile to 0
+            End_Object
+            
+            Object oCustomerPhone_Number is a cWebForm
+                Entry_Item Customer.Phone_Number
+                Set piColumnSpan to 9
+                Set psLabel to "Phone"
+                Set piLabelOffset to 75
+                
+                WebSetResponsive peLabelPosition rmMobile to lpTop
+                WebSetResponsive piLabelOffset rmMobile to 0
+            End_Object
+            
+            Object oCustomerFax_Number is a cWebForm
+                Entry_Item Customer.Fax_Number
+                Set psLabel to "Fax"
+                Set piColumnSpan to 9
+                Set piLabelOffset to 75
+                
+                WebSetResponsive peLabelPosition rmMobile to lpTop
+                WebSetResponsive piLabelOffset rmMobile to 0
+            End_Object
+            
+            Object oCustomerEMail_Address is a cWebForm
+                Entry_Item Customer.EMail_Address
+                Set psLabel to "E-Mail"
+                Set piLabelOffset to 75
+                Set piColumnSpan to 0
+                
+                WebSetResponsive peLabelPosition rmMobile to lpTop
+                WebSetResponsive piLabelOffset rmMobile to 0
+            End_Object
+            
+        End_Object
+        
+        Object oBalances_group is a cWebGroup
+            Set piColumnCount to 12
+            Set piColumnIndex to 6
+            Set piColumnSpan to 6
+            Set psCaption to "Balances"
+            
+            WebSetResponsive piColumnCount rmMobile to 1
+            
+            Object oCustomerCredit_Limit is a cWebForm
+                Entry_Item Customer.Credit_Limit
+                Set psLabel to "Credit Limit"
+                Set piColumnSpan to 9
+                Set piLabelOffset to 105
+            End_Object
+            
+            Object oCustomerPurchases is a cWebForm
+                Entry_Item Customer.Purchases
+                Set psLabel to "Purchases"
+                Set piColumnSpan to 9
+                Set piLabelOffset to 105
+            End_Object
+            
+            Object oCustomerBalance is a cWebForm
+                Entry_Item Customer.Balance
+                Set psLabel to "Balance Due"
+                Set piColumnSpan to 9
+                Set piLabelOffset to 105
+            End_Object
+        End_Object
+        
+        Object oComments_group is a cWebGroup
+            Set piColumnCount to 12
+            Set psCaption to "Comments"
+            Set pbFillHeight to True
+            
+            WebSetResponsive piColumnCount rmMobile to 1
+            
+            Object oCustomerComments is a cWebEdit
+                Entry_Item Customer.Comments
+                Set piColumnSpan to 0
+                Set piColumnIndex to 0
+                Set pbShowLabel to False
+                Set piMinHeight to 150
+                Set pbFillHeight to True
+            End_Object
+        End_Object
+    End_Object
+    
+    Object oActionGroup is a cWebMenuGroup
+        
+        Object oSaveBtn is a cWebMenuItem
+            Set psCaption to "Save"
+            Set psCSSClass to "WebSaveMenuItem"
+            
+            Procedure OnClick
+                Send Request_Save
+            End_Procedure
+        End_Object
+        
+        Object oEditBtn is a cWebMenuItem
+            Set psCaption to "Edit"
+            Set psCSSClass to "WebEditMenuItem"
+            Procedure OnClick
+                Send ChangeEditMode True
+                Send SetActionButtons
+            End_Procedure
+        End_Object
+        
+        Object oDeleteBtn is a cWebMenuItem
+            Set psCaption to "Delete"
+            Set psCSSClass to "WebDeleteMenuItem"
+            Set peActionDisplay to adMenu
+            
+            Procedure OnClick
+                Send Request_Delete
+            End_Procedure
+        End_Object
+        
+        Object oCancelChangesBtn is a cWebMenuItem
+            
+            Set psCaption to "Clear Changes"
+            Set peActionDisplay to adMenu
+            
+            Procedure OnClick
+                Send RefreshRecord
+            End_Procedure
+        End_Object
+        
+    End_Object
+    
+    Procedure SetActionButtons
+        tWebNavigateData NavigateData
+        Boolean bHasRecord
+        Handle hoDD
+        
+        Get Server to hoDD
+        Get GetNavigateData to NavigateData
+        Get HasRecord of hoDD to bHasRecord
+        
+        WebSet pbRender of oEditBtn to False
+        WebSet pbRender of oSaveBtn to False
+        WebSet pbRender of oCancelChangesBtn to False
+        WebSet pbRender of oDeleteBtn to False
+        
+        If (NavigateData.bReadOnly) Begin
+            WebSet pbRender of oEditBtn to True
+        End
+        Else Begin
+            WebSet pbRender of oSaveBtn to True
+            WebSet pbRender of oCancelChangesBtn to True
+            WebSet pbRender of oDeleteBtn to bHasRecord
+        End
+    End_Procedure
+    
+    Procedure OnViewSaved Handle hoServer Boolean bChanged
+        Send NavigateClose Self
+    End_Procedure
+    
+    Procedure OnViewDeleted Handle hoDDO
+        Send NavigateClose Self
+    End_Procedure
+    
+    Procedure OnNavigateForward tWebNavigateData NavigateData Handle hoInvokingView Handle hoInvokingObject
+        Boolean bHasRecord
+        Get HasRecord of oCustomerDataDictionary to bHasRecord
+        If bHasRecord Begin
+            Send SetBreadcrumbCaption (Trim(customer.Name))
+        End
+        Else Begin
+            Send SetBreadcrumbCaption "New Customer"
+        End
+        Send SetHeaderCaption "Customer"
+        
+        Send SetActionButtons
+    End_Procedure
+    
+End_Object
+

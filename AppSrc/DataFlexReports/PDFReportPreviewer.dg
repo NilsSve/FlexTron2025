@@ -1,0 +1,57 @@
+Use Windows.pkg
+Use cWebView2Browser.pkg
+
+Object oPDFReportPreviewer is a ModalPanel
+    Set Size to 295 421
+    Set Label to "PDF"
+    Set piMinSize to 89 211
+    Set Location to 2 2
+    Set Border_Style to Border_Thick
+
+    Procedure Page_Object Boolean bPage
+        Forward Send Page_Object bPage
+
+        If (bPage) Begin
+            Set Icon to "Default.Ico"
+        End
+    End_Procedure
+
+    Procedure Close_Panel
+        Send Stop_UI
+    End_Procedure
+
+    { DesignTime = False }
+    Property Handle phoReport
+
+    Object oPDFOutputViewerHost is a cWebView2Browser
+        Set Size to 293 420
+        Set Location to 0 0
+        Set peAnchors to anAll
+        Set pbAreDevToolsEnabled to True
+        Set pbAreDefaultContextMenusEnabled to True
+
+        On_Key Key_Escape Send Close_Panel
+
+        Procedure OnCreate
+            Forward Send OnCreate
+
+            Send ShowReport
+        End_Procedure
+
+        Procedure ShowReport
+            Handle hoReport
+            String sFile sUrl
+
+            Get phoReport to hoReport
+            Get GenerateReport of hoReport to sFile
+            If (DoesFileExist (sFile)) Begin
+                Send Navigate sFile
+            End
+        End_Procedure
+    End_Object
+
+    Procedure ShowReport Handle hoReport
+        Set phoReport to hoReport
+        Send Popup
+    End_Procedure
+End_Object

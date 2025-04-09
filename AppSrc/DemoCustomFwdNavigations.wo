@@ -1,0 +1,190 @@
+﻿Use cWebPanel.pkg
+Use cWebForm.pkg
+Use cWebCheckBox.pkg
+Use cWebGroup.pkg
+Use cWebCombo.pkg
+Use cWebEdit.pkg
+Use cWebMenuGroup.pkg
+Use cWebMenuItem.pkg
+Use cWebButton.pkg
+Use cWebSpacer.pkg
+Use cWebView.pkg
+Use cWebLabel.pkg
+
+// this is a standard DD based validation list select
+Use SelectValidationValue.wo
+
+// this shows how to navigate to a non DEO list of custom items
+Use SelectStandardComments.wo
+
+// this shows how to navigate to a custom non DEO zoom
+Use ZoomCustomerStatusHelp.wo
+
+Use cCustomerDataDictionary.DD
+
+Object oDemoCustomFwdNavigations is a cWebView
+    Set peViewType to vtZoom
+    Set psCaption to "Custom Navigations"
+    Set pbShowCaption to False
+    Set piColumnCount to 12
+    Set piMaxWidth to 1024
+    
+    // we don't care if there are changes when exiting
+    Set peChangedViewExitAction to cveAbandonChanges
+    
+    WebSetResponsive piColumnCount rmMobile to 6
+    WebSetResponsive piWidth       rmMobile to 0
+    
+    Object oCustomerDataDictionary is a cCustomerDataDictionary
+    End_Object
+    
+    Set Main_DD to oCustomerDataDictionary
+    Set Server  to oCustomerDataDictionary
+    
+    Object oCustomerNumber is a cWebForm
+        Entry_Item Customer.Customer_Number
+        Set piColumnSpan to 4
+        Set psLabel to "Customer #"
+        Set psPlaceHolder to "New"
+        Set peLabelPosition to lpTop
+        Set peAlign to alignLeft
+        
+        WebSetResponsive piColumnSpan rmMobile to 2
+        WebSetResponsive piLabelOffset rmMobile to 0
+        
+    End_Object
+    
+    Object oCustomerName is a cWebForm
+        Entry_Item Customer.Name
+        Set piColumnSpan to 0
+        Set psLabel to "Name"
+        Set peLabelPosition to lpTop
+    End_Object
+    
+    Object oStatus_group is a cWebGroup
+        Set piColumnCount to 12
+        Set piColumnSpan to 12
+        Set psCaption to "Custom Zoom Navigation"
+        
+        WebSetResponsive piColumnCount rmMobile to 1
+        
+        Object oCustomerStatus is a cWebCheckBox
+            Entry_Item Customer.Status
+            Set psCaption to "Active Customer"
+            Set piColumnSpan to 4
+            Set pbShowLabel to True
+            Set piLabelOffset to 90
+            Set pbShowLabel to False
+            WebSetResponsive piColumnIndex rmMobile to 1
+        End_Object
+        
+        Object oStatusHelper is a cWebButton
+            Set piColumnSpan to 4
+            Set psCaption to "Help Me Decide"
+            Set piColumnIndex to 4
+            
+            WebRegisterPath ntNavigateForward oZoomCustomerStatusHelp
+            
+            Procedure OnClick
+                Send NavigatePath
+            End_Procedure
+            
+            Procedure OnGetNavigateForwardData tWebNavigateData ByRef NavigateData Handle hoToView
+                String sValue
+                Boolean bChecked
+                Get GetChecked of oCustomerStatus to bChecked
+                WebGet psValue of oCustomerName to sValue
+                Get NamedValueAdd NavigateData.NamedValues "name" sValue to NavigateData.NamedValues
+                Get NamedValueAdd NavigateData.NamedValues "status" bChecked to NavigateData.NamedValues
+            End_Procedure
+            
+            Procedure OnNavigateBack Handle hoCallback tWebNavigateData NavigateData
+                Boolean bFound bOldStat bNewStat
+                String sValue
+                Get NamedValueGet NavigateData.NamedValues "newstatus" to sValue
+                Get GetChecked of oCustomerStatus to bOldStat
+                Move (sValue="1") to bNewStat
+                If (bNewStat<>bOldStat) Begin
+                    Send SetChecked of oCustomerStatus bNewStat
+                    WebSet pbChanged of oCustomerStatus to True
+                End
+            End_Procedure
+        End_Object
+    End_Object
+    
+    Object oAddress_group is a cWebGroup
+        Set piColumnCount to 13
+        Set piColumnSpan to 12
+        Set psCaption to "Prompt to a Validation Table"
+        
+        WebSetResponsive piColumnCount rmMobile to 1
+        
+        Object oCustomerState is a cWebForm
+            Entry_Item Customer.State
+            Set piColumnSpan to 3
+            Set peLabelPosition to lpTop
+            Set psLabel to "State"
+            Set pbPromptButton to True
+            
+            WebSetResponsive peLabelPosition rmMobile to lpTop
+            WebSetResponsive piLabelOffset rmMobile to 0
+
+            WebRegisterPath ntNavigateForward oSelectValidationValue
+            
+            Procedure OnPrompt
+                Send NavigatePath
+            End_Procedure
+            
+            Procedure OnNavigateBack Handle hoCallback tWebNavigateData NavigateData
+                String sValue
+                Get NamedValueGet NavigateData.NamedValues "value" to sValue
+                WebSet psValue to sValue
+                WebSet pbChanged to True
+            End_Procedure
+            
+        End_Object
+        
+    End_Object
+    
+    Object oComments_group is a cWebGroup
+        Set piColumnCount to 12
+        Set psCaption to "Custom Select View"
+        Set pbFillHeight to True
+        
+        WebSetResponsive piColumnCount rmMobile to 1
+        
+        Object oCustomerComments is a cWebEdit
+            Entry_Item Customer.Comments
+            Set piColumnSpan to 0
+            Set piColumnIndex to 0
+            Set pbShowLabel to False
+            Set piMinHeight to 150
+            Set pbFillHeight to True
+            
+            WebRegisterPath ntNavigateForward oSelectStandardComments
+            
+            Procedure OnNavigateBack Handle hoCallback tWebNavigateData NavigateData
+                String sValue sOldValue
+                Get NamedValueGet NavigateData.NamedValues "value" to sValue
+                WebGet psValue to sOldValue
+                If (sOldValue<>"") Begin
+                    Move (sOldValue + Character(10)) to sOldValue
+                End
+                Move (sOldValue + String(Date(CurrentDateTime())) + " - " + sValue) to sValue
+                WebSet psValue  to sValue
+                WebSet pbChanged  to True
+            End_Procedure
+        End_Object
+        
+        Object oWebButton1 is a cWebButton
+            Set piColumnSpan to 5
+            Set psCaption to "Add Standard Comments"
+            
+            Procedure OnClick
+                Send NavigatePath of oCustomerComments
+            End_Procedure
+        End_Object
+    End_Object
+    
+End_Object
+

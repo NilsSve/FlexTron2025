@@ -1,0 +1,419 @@
+﻿Use DfAllEnt.pkg
+Use cFlexTronPanel.pkg
+
+// This contains all WebControl Classes all the way from cWebButton to the cWebList.
+Use AllWebControlClasses.pkg
+// This is required to host a complete webapp whithin Windows.
+Use cLocalWebAppHost.pkg
+
+Object oHtmlHelp is a cHtmlHelp
+End_Object
+
+Object oApplication is a cApplication
+    Set psCompany to "Data Access Worldwide"
+    Set psProduct to "DataFlex Examples"
+    Set psVersion to C_DFVersion
+    Set psProgram to "FlexTronOrderDrillDown"
+
+    Set peHelpType to htHtmlHelp
+
+    Object oConnection is a cConnection
+Use LoginEncryption.pkg
+Use DatabaseLoginDialog.dg
+    End_Object
+
+End_Object
+
+// We define a Panel like we normally would.
+
+Object oMain is a cFlexTronPanel
+    Set Label to "FlexTron Order Entry"
+    Set Location to 4 3
+    Set Size to 300 500
+    
+    /* 
+    Using the cLocalWebAppHost we can host an entire WebApp.
+    For this sample we ported WebOrder Mobile to our Windows Application,
+        Which is practically an entire port but beware that in this sample; Login and the session manager are disabled.
+    
+        Also remember to Use (Host(Self)) instead of ghoWebApp!
+        */
+        Object oLocalWebAppHost is a cLocalWebAppHost
+            // Windows View Properties
+            Set Size to 300 500
+            Set Location to 0 0
+            Set peAnchors to anAll
+        
+            // Enable DevTools if you want, a normal production application should not have this.
+            Set pbAreDevToolsEnabled to True
+            Set pbAreDefaultContextMenusEnabled to True
+        
+            // From here on web
+            Set psTheme to "Df_Material"
+            Set peAlignView to alignCenter
+            Set psApplicationTitle to ("FlexTron Order Entry " + String(PKG_Version) + "." + String(PKG_Revision))
+    
+            // It is important to set this so that all views will default
+            // to drill down style views.
+            Set peApplicationStyle to wvsDrillDown
+            Set peApplicationStateMode to asmHistoryAndUrls
+            Set pbAreBrowserAcceleratorKeysEnabled to True
+    
+            //    Procedure OnLoad
+            //        Boolean bOk
+            //        Get UserLogin of ghoWebSessionManager "john" "John" to bOk
+            //    End_Procedure
+    
+            Object oViewStack is a cWebViewStack
+                // use ghoWebViewStack to reference this object
+            End_Object
+    
+            Procedure HideHeader
+                WebSet pbRender of oHeaderPanel to False
+            End_Procedure
+    
+            Procedure ShowHeader
+                WebSet pbRender of oHeaderPanel to True
+            End_Procedure
+    
+            Object oHeaderPanel is a cWebPanel
+                Set peRegion to prTop
+                Set psCSSClass to "HeaderPanel"
+    
+                Object oMenuPanel is a cWebPanel
+                    Set peRegion to prLeft
+                    Set piWidth to 50
+    
+                    Object oMenuButton is a cWebMenuButton
+                        Set piMenuHeight to 500
+    
+                        Object oDashboard_itm is a cWebMenuItem
+                            Set psCaption to "Dashboard"
+    
+                            WebRegisterPath ntNavigateBegin oDashboard
+    
+                            Procedure OnClick
+                                Send NavigatePath
+                            End_Procedure
+                        End_Object
+    
+                        Object oCustomer_itm is a cWebMenuItem
+                            Set psCaption to "Customer Query"
+    
+                            WebRegisterPath ntNavigateBegin oSelectOrdersByCustomer
+    
+                            Procedure OnClick
+                                Send NavigatePath
+                            End_Procedure
+                        End_Object
+    
+                        Object oSalesP_itm is a cWebMenuItem
+                            Set psCaption to "Sales Person Query"
+    
+                            WebRegisterPath ntNavigateBegin oSelectSalesPerson
+    
+                            Procedure OnClick
+                                Send NavigatePath
+                            End_Procedure
+                        End_Object
+    
+                        Object oOrder_itm is a cWebMenuItem
+                            Set psCaption to "Orders Query"
+    
+                            WebRegisterPath ntNavigateBegin oSelectOrder
+    
+                            Procedure OnClick
+                                Send NavigatePath
+                            End_Procedure
+                        End_Object
+                    
+                        Object oReports_itm is a cWebMenuItem
+                            Set psCaption to "Reports"
+    
+                            Object oOrder_itm is a cWebMenuItem
+                                Set psCaption to "Customerlist"
+        
+                                WebRegisterPath ntNavigateBegin oCustomerListReportSelect
+        
+                                Procedure OnClick
+                                    Send NavigatePath
+                                End_Procedure
+                            End_Object
+                        End_Object
+    
+                        Object oDemo_itm is a cWebMenuItem
+                            Set psCaption to "Demo Techniques"
+    
+                            Object oDialogs_itm is a cWebMenuItem
+                                Set psCaption to "Modal Dialogs"
+    
+                                WebRegisterPath ntNavigateBegin oDemoDialogs
+    
+                                Procedure OnClick
+                                    Send NavigatePath
+                                End_Procedure
+                            End_Object
+    
+                            Object oCSSClasses_itm is a cWebMenuItem
+                                Set psCaption to "Extended CSS Classes"
+    
+                                WebRegisterPath ntNavigateBegin oDemoCSSClasses
+    
+                                Procedure OnClick
+                                    Send NavigatePath
+                                End_Procedure
+                            End_Object
+    
+                            Object oExpandableWebListPanel_itm is a cWebMenuItem
+                                Set psCaption to "Expandable List Panel"
+    
+                                WebRegisterPath ntNavigateBegin oDemoExpandPanel
+    
+                                Procedure OnClick
+                                    Send NavigatePath
+                                End_Procedure
+                            End_Object
+    
+                            Object oSlider_Itm is a cWebMenuItem
+                                Set psCaption to "Sliders and Tab Dialogs"
+    
+                                WebRegisterPath ntNavigateBegin oDemoSliders
+    
+                                Procedure OnClick
+                                    Send NavigatePath
+                                End_Procedure
+                            End_Object
+    
+                            Object oCheckboxRadio_Itm is a cWebMenuItem
+                                Set psCaption to "Styled Checkboxes & Radios"
+    
+                                WebRegisterPath ntNavigateBegin oDemoCheckboxRadio
+    
+                                Procedure OnClick
+                                    Send NavigatePath
+                                End_Procedure
+                            End_Object
+    
+                            Object oDemoCustomFwdNavigations_itm is a cWebMenuItem
+                                Set psCaption to "Custom Forward Navigations"
+    
+                                WebRegisterPath ntNavigateBegin oDemoCustomFwdNavigations
+    
+                                Procedure OnClick
+                                    Send NavigatePath
+                                End_Procedure
+    
+                                Procedure OnGetNavigateForwardData tWebNavigateData ByRef NavigateData Handle hoToView
+                                    Move True to NavigateData.bNewRecord
+                                End_Procedure
+                            End_Object
+    
+                            Object oDemoSwipableCards_itm is a cWebMenuItem
+                                Set psCaption to "Swipable Cards"
+    
+                                WebRegisterPath ntNavigateBegin oDemoSwipableCards
+    
+                                Procedure OnClick
+                                    Send NavigatePath
+                                End_Procedure
+                            End_Object
+    
+                            Object oDemoGeoLocation_itm is a cWebMenuItem
+                                Set psCaption to "Geolocation API"
+    
+                                WebRegisterPath ntNavigateBegin oDemoGeoLocation
+    
+                                Procedure OnClick
+                                    Send NavigatePath
+                                End_Procedure
+                            End_Object
+                        
+                        End_Object
+    
+                        Object oMaintenance_itm is a cWebMenuItem
+                            Set psCaption to "Maintenance"
+    
+                            Object oSalesPersons_itm is a cWebMenuItem
+                                Set psCaption to "Sales Persons"
+    
+                                WebRegisterPath ntNavigateBegin oSelectSalesPerson
+    
+                                Procedure OnClick
+                                    Send NavigatePath
+                                End_Procedure
+    
+                                Procedure OnGetNavigateForwardData tWebNavigateData ByRef NavigateData Handle hoToView
+                                    Get NamedValueAdd NavigateData.NamedValues "task" "maint" to NavigateData.NamedValues
+                                End_Procedure
+                            End_Object
+    
+                            Object oCustomer_itm is a cWebMenuItem
+                                Set psCaption to "Customers"
+    
+                                WebRegisterPath ntNavigateBegin oSelectCustomer
+    
+                                Procedure OnClick
+                                    Send NavigatePath
+                                End_Procedure
+    
+                                Procedure OnGetNavigateForwardData tWebNavigateData ByRef NavigateData Handle hoToView
+                                    Get NamedValueAdd NavigateData.NamedValues "task" "maint" to NavigateData.NamedValues
+                                End_Procedure
+                            End_Object
+    
+                            Object oVendor_itm is a cWebMenuItem
+                                Set psCaption to "Vendors"
+    
+                                WebRegisterPath ntNavigateBegin oSelectVendor
+    
+                                Procedure OnClick
+                                    Send NavigatePath
+                                End_Procedure
+    
+                                Procedure OnGetNavigateForwardData tWebNavigateData ByRef NavigateData Handle hoToView
+                                    Get NamedValueAdd NavigateData.NamedValues "task" "maint" to NavigateData.NamedValues
+                                End_Procedure
+                            End_Object
+    
+                            Object oInventory_itm is a cWebMenuItem
+                                Set psCaption to "Products"
+    
+                                WebRegisterPath ntNavigateBegin oSelectInventory
+    
+                                Procedure OnClick
+                                    Send NavigatePath
+                                End_Procedure
+    
+                                Procedure OnGetNavigateForwardData tWebNavigateData ByRef NavigateData Handle hoToView
+                                    Get NamedValueAdd NavigateData.NamedValues "task" "maint" to NavigateData.NamedValues
+                                End_Procedure
+                            End_Object
+                        End_Object
+    
+                        //                    Object oSignOut_itm is a cWebMenuItem
+                        //                        Set psCaption to "Sign Out"
+                        //    
+                        //                        Procedure OnClick
+                        //                            Send RequestLogOut of ghoWebSessionManager
+                        //                        End_Procedure
+                        //                    End_Object
+                    End_Object
+    
+                    Object oBackButton is a cWebButton
+                        Set psCSSClass to "WebBack_Icon"
+                        Set pbRender to False
+    
+                        Procedure OnClick
+                            Handle hoTop
+    
+                            Get TopViewHandle of ghoWebViewStack to hoTop
+                            If (hoTop > 0) Begin
+                                Send NavigateCancel of hoTop
+                            End
+                        End_Procedure
+                    End_Object
+    
+                    Send AddClient of ghoWebViewStack Self
+    
+                    Procedure OnUpdateViewStack
+                        Handle hoTop hoDflt
+                        Integer eMode
+                        Boolean bTop
+    
+                        WebGet peMode of (Owner(Self)) to eMode
+    
+                        Get TopViewHandle of ghoWebViewStack to hoTop
+                        Get GetDefaultView to hoDflt
+                        Move (hoTop=0 or hoTop=hoDflt) to bTop
+    
+                        WebSet pbRender of oBackButton to (not(bTop) and eMode >= rmMobile)
+                        WebSet pbRender of oMenuButton to (bTop or eMode < rmMobile)
+                    End_Procedure
+                End_Object
+    
+                Object oCaptionPanel is a cWebPanel
+                    Set piColumnCount to 12
+    
+                    Object oCaptionBreadcrumb is a cWebBreadcrumb
+                        Set peBreadcrumbStyle to crumbCaption
+                        Set piColumnSpan to 12
+                        WebSetResponsive peBreadcrumbStyle rmMobile to crumbDropDown
+                    End_Object
+                End_Object
+    
+                Object oActionPanel is a cWebPanel
+                    Set peRegion to prRight
+                    Set piColumnCount to 1
+                    Set piWidth to 120
+    
+                    Object oMainActions is a cWebActionBar
+                        Set piColumnSpan to 0
+                        Set peAlign to alignRight
+                    End_Object
+                End_Object
+    
+                Object oBreadcrumbPanel is a cWebPanel
+                    Set peRegion to prBottom
+                    WebSetResponsive pbRender rmMobile to False
+    
+                    Object oHorizontalBreadcrumb is a cWebBreadcrumb
+                        // Do not render this breadcrumb if there is only the Dashboard view in
+                        // the stack
+                        Procedure OnUpdateViewStack
+                            Integer iCount
+                            Get ViewStackSize of ghoWebViewStack to iCount
+                            WebSet pbRender to (iCount > 1)
+    
+                            Forward Send OnUpdateViewStack
+                        End_Procedure
+                    End_Object
+                End_Object
+            End_Object
+    
+            //Use SessionManager.wo
+Use WebResourceManager.wo
+    
+Use SelectCustomer.wo
+Use ZoomCustomer.wo
+    
+Use SelectOrder.wo
+Use ZoomOrder.wo
+    
+Use SelectSalesPerson.wo
+Use ZoomSalesPerson.wo
+    
+Use ZoomVendor.wo
+Use SelectVendor.wo
+    
+Use SelectInventory.wo
+Use ZoomInventory.wo
+    
+            //Use Login.wo
+Use ZoomOrderDetail.wo
+    
+Use Dashboard.wo
+Use DemoDialogs.wo
+Use DemoCSSClasses.wo
+Use DemoSliders.wo
+Use DemoCustomFwdNavigations.wo
+Use DemoCheckboxRadio.wo
+Use DemoSwipableCards.wo
+Use SelectOrdersByCustomer.wo
+Use DemoExpandPanel.wo
+Use DemoGeoLocation.wo
+Use DataFlexReports\CustomerListReportSelect.wo
+    
+            Set phoDefaultView to oDashboard
+        
+            //  Update caption of the window with new title
+            Procedure OnGeneratePageTitle String  ByRef sTitle Handle hoView String sViewTitle
+                Forward Send OnGeneratePageTitle (&sTitle) hoView sViewTitle
+            
+                Set Label of oMain to sTitle
+            End_Procedure
+        End_Object
+
+    End_Object
+
+    Send Activate of oMain
+Start_UI

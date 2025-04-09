@@ -1,0 +1,60 @@
+Use Windows.pkg
+Use cLocalWebControlHost.pkg
+Use cWebDRReportViewer.pkg
+
+Object oImageReportPreviewer is a ModalPanel
+    Set Size to 293 462
+    Set Label to "Image"
+    Set piMinSize to 89 211
+    Set Location to 2 2
+    Set Border_Style to Border_Thick
+
+    Procedure Page_Object Boolean bPage
+        Forward Send Page_Object bPage
+
+        If (bPage) Begin
+            Set Icon to "Default.Ico"
+        End
+    End_Procedure
+
+    Procedure Close_Panel
+        Send Stop_UI
+    End_Procedure
+
+    Object oImageOutputViewerHost is a cLocalWebControlHost
+        Set Size to 293 462
+        Set Location to 0 0
+        Set peAnchors to anAll
+        Set pbAreDevToolsEnabled to True
+        Set pbAreDefaultContextMenusEnabled to True
+
+        On_Key Key_Escape Send Close_Panel
+
+        Procedure OnDefineScriptIncludes String[] ByRef aScriptHtml
+            Move @'
+<script src="DfEngine/df-Include.js"></script>
+<!-- DataFlex Custom Controls (Do not remove this line, used for automatic insertion) -->
+
+<!-- DataFlex Reports Engine -->
+<link href="DataFlexReports/Fonts/FontIcons.css" rel="stylesheet" type="text/css" />
+<link href="DataFlexReports/CssThemes/Df_Material/Integration.css" rel="stylesheet" type="text/css" />
+<link href="DataFlexReports/CssThemes/ReportViewer.css" rel="stylesheet" type="text/css" />
+<script src="DataFlexReports/Previewer.js"></script>' to aScriptHtml[SizeOfArray (aScriptHtml)]
+        End_Procedure
+
+        Object oImageReportViewer is a cWebDRReportViewer
+            Set piZoom to 75
+            Set peMode to C_IMAGEOUTPUT
+
+            Procedure OnLoad
+                Forward Send OnLoad
+                Send ShowReport
+            End_Procedure
+        End_Object
+    End_Object
+
+    Procedure ShowReport Handle hoReport
+        Set phoReport of oImageReportViewer to hoReport
+        Send Popup
+    End_Procedure
+End_Object

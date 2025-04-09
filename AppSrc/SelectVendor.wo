@@ -1,0 +1,225 @@
+﻿Use cWebView.pkg
+Use cWebPanel.pkg
+Use cWebButton.pkg
+Use cWebColumn.pkg
+Use cWebColumnButton.pkg
+Use cWebMenuGroup.pkg
+Use cWebMenuItem.pkg
+
+Use cVendorDataDictionary.dd
+
+Register_Object oZoomVendor
+
+Object oSelectVendor is a cWebView
+    Set piColumnCount to 7
+    Set psCaption to "Vendors"
+    Set pbShowCaption to False
+    Set peViewType to vtSelect
+    Set piMaxWidth to 1024
+    Set psStateViewName to "Vendors"
+    
+    WebSetResponsive piColumnCount rmTabletPortrait to 3
+    
+    Object oVendorDataDictionary is a cVendorDataDictionary
+    End_Object
+    
+    Set Main_DD to oVendorDataDictionary
+    Set Server  to oVendorDataDictionary
+    
+    Object oList is a cWebList
+        Set piColumnSpan to 0
+        Set pbFillHeight to True
+        Set psCSSClass to "MobileList"
+        Set piSortColumn to 0
+        Set pbServerOnRowClick to True
+        Set pbShowHeader to False
+        Set peDbGridType to gtAllData
+        
+        Object oVendorName1 is a cWebColumn
+            Entry_Item Vendor.Name
+            Set psCaption to "Vendor Name"
+            Set piWidth to 315
+            Set psCSSClass to "RowCaption"
+        End_Object
+        
+        Object oVendorVendor_Number is a cWebColumn
+            Entry_Item Vendor.ID
+            Set psCaption to "ID"
+            Set piWidth to 50
+            Set pbFixedWidth to True
+            Set peAlign to alignRight
+        End_Object
+        
+        Object oDetailButton is a cWebColumnButton
+            Set piWidth to 50
+            Set pbFixedWidth to True
+            Set psCaption to "btn"
+            Set pbResizable to False
+            Set piListRowSpan to 4
+            Set psBtnCssClass to "WebButtonIcon WebIcon_Info"
+            Set peAlign to alignRight
+            
+            WebRegisterPath ntNavigateForward oZoomVendor
+            
+            Procedure OnClick String sButton String sRowId
+                Send NavigatePath
+            End_Procedure
+            
+            Procedure OnGetNavigateForwardData tWebNavigateData ByRef NavigateData Handle hoToView
+                Move True to NavigateData.bReadOnly
+            End_Procedure
+        End_Object
+        
+        Object oVendor_Address is a cWebColumn
+            Entry_Item Vendor.Address
+            Set psCaption to "Address"
+            Set piWidth to 50
+            Set pbNewLine to True
+            Set piListColSpan to 2
+            Set psCSSClass to "RowDetail"
+        End_Object
+        
+        Object oVendor_City is a cWebColumn
+            Set psCaption to "City, State, Zip"
+            Set piWidth to 50
+            Set pbNewLine to True
+            Set piListColSpan to 2
+            Set psCSSClass to "RowDetail"
+            
+            Procedure OnSetCalculatedValue String ByRef sValue
+                Move (Vendor.City - "," * Vendor.State - "," * Vendor.Zip) to sValue
+            End_Procedure
+        End_Object
+        
+        Object oVendor_Phone is a cWebColumn
+            Entry_Item Vendor.Phone_Number
+            Set psCaption to "Phone"
+            Set piWidth to 50
+            Set pbNewLine to True
+            Set piListColSpan to 2
+            Set psCSSClass to "RowDetail"
+        End_Object
+        
+        WebRegisterPath ntNavigateForward oZoomVendor
+        
+        Procedure OnRowClick String sRowID
+            tWebNavigateData NavigateData
+            Get GetNavigateData to NavigateData
+            
+            Case Begin
+                Case (NavigateData.eNavigateType=nfFromChild)
+                Case (NavigateData.eNavigateType=nfFromMain)
+                    // a child or main lookup
+                    Send NavigateClose Self
+                    Case Break
+                Case (NavigateData.eNavigateType=nfFromParent)
+                    // not used currently
+                    Case Break
+                Case Else
+                    Send NavigatePath
+            Case End
+        End_Procedure
+    End_Object
+    
+    
+    Object oActionGroup is a cWebMenuGroup
+        
+        Object oSearch is a cWebMenuItem
+            Set psCaption to "Search"
+            Set psCSSClass to "WebPromptMenuItem"
+            
+            Procedure OnClick
+                Send Search of oList
+            End_Procedure
+            
+        End_Object
+        
+        Object oNewButton is a cWebMenuItem
+            Set psCaption to "New Vendor"
+            Set psCSSClass to "WebClearMenuItem"
+            
+            WebRegisterPath ntNavigateForward oZoomVendor Self "NewVendor"
+            
+            Procedure OnClick
+                Send NavigatePath
+            End_Procedure
+            
+            Procedure OnGetNavigateForwardData tWebNavigateData ByRef NavigateData Handle hoToView
+                Move True to NavigateData.bNewRecord
+            End_Procedure
+        End_Object
+        
+        Object oSearchOrderVendorName is a cWebMenuItem
+            Set psCaption to "List by Vendor Name"
+            Set peActionDisplay to adMenu
+            Set pbBeginGroup to True
+            
+            Procedure OnClick
+                WebSet piSortColumn of oList to 0
+                Send GridRefresh of oList
+            End_Procedure
+            
+        End_Object
+        
+        Object oSearchOrderVendorNumber is a cWebMenuItem
+            Set psCaption to "List by Vendor Number"
+            Set peActionDisplay to adMenu
+            
+            Procedure OnClick
+                WebSet piSortColumn of oList to 1
+                Send GridRefresh of oList
+            End_Procedure
+            
+        End_Object
+        
+        Object oFindTop is a cWebMenuItem
+            Set psCaption to "Top"
+            Set peActionDisplay to adMenu
+            Set pbBeginGroup to True
+            
+            Procedure OnClick
+                Send MoveToFirstRow of oList
+            End_Procedure
+            
+        End_Object
+        
+        Object oFindLast is a cWebMenuItem
+            Set psCaption to "Bottom"
+            Set peActionDisplay to adMenu
+            
+            Procedure OnClick
+                Send MoveToLastRow of oList
+            End_Procedure
+            
+        End_Object
+        
+    End_Object
+    
+    Procedure OnNavigateForward tWebNavigateData NavigateData Handle hoInvokingView Handle hoInvokingObject
+        // turns all buttons on
+        WebSet pbRender of oNewButton to True
+        WebSet pbRender of oDetailButton to True
+        Send SetBreadcrumbCaption "Vendors"
+        Send SetHeaderCaption     "Vendors Select"
+        
+        Case Begin
+            Case (NavigateData.eNavigateType = nfFromMain)
+                // a main-file lookup
+                // not used yet
+                WebSet pbRender of oNewButton to False
+                WebSet pbRender of oDetailButton to False
+                Case Break
+            Case (NavigateData.eNavigateType = nfFromChild)
+                Case Break
+            Case (NavigateData.eNavigateType = nfFromParent)
+                // A parent query
+                // not used yet
+                Case Break
+            Case Else
+                // must be a maintenance drill down
+                WebSet pbRender of oDetailButton to False
+        Case End
+    End_Procedure
+    
+End_Object
+

@@ -1,0 +1,268 @@
+﻿Use cWebView.pkg
+Use cWebList.pkg
+Use cWebMenuGroup.pkg
+Use cWebMenuItem.pkg
+Use cWebColumnButton.pkg
+Use cWebColumn.pkg
+Use cWebCombo.pkg
+Use cWebCheckbox.pkg
+
+Use cCustomerDataDictionary.dd
+Use cSalesPersonDataDictionary.dd
+Use cOrderHeaderDataDictionary.dd
+Use cWebListExpandPanel.pkg
+Use cWebButton.pkg
+Use cWebLabel.pkg
+
+Object oSelectOrdersByCustomer is a cWebView
+    Set psCaption to "Orders By Customer"
+    Set peWebViewStyle to wvsDrilldown
+    Set peViewType to vtSelect
+    Set piColumnCount to 12
+    Set pbShowCaption to False
+    Set piMaxWidth to 1024
+    Set psStateViewName to "OrdersByCustomer"
+    
+    Object oSalesPersonDataDictionary is a cSalesPersonDataDictionary
+    End_Object
+    
+    Object oCustomerDataDictionary is a cCustomerDataDictionary
+    End_Object
+    
+    Object oOrderHeaderDataDictionary is a cOrderHeaderDataDictionary
+        Set DDO_Server to oSalesPersonDataDictionary
+        Set Constrain_file to Customer.File_number
+        Set DDO_Server to oCustomerDataDictionary
+        Set Ordering to 2
+        Set pbAutoFillFromFirst to False
+    End_Object
+    
+    Set Main_DD to oCustomerDataDictionary
+    Set Server  to oCustomerDataDictionary
+    
+   
+    Object oList is a cWebList
+        Set piColumnSpan to 0
+        Set psCSSClass to "MobileList"
+        Set pbFillHeight to True
+        Set pbShowHeader to False
+        Set piSortColumn to 0
+        Set pbServerOnRowClick to True
+        
+        Object oCustomerName is a cWebColumn
+            Entry_Item Customer.Name
+            Set psCaption to "Customer Name"
+            Set piWidth to 315
+            Set psCSSClass to "RowCaption"
+            Set piListColSpan to 3
+        End_Object
+        
+        Object oCustomerCustomer_Number is a cWebColumn
+            Entry_Item Customer.Customer_Number
+            Set psCaption to "Number"
+            Set piWidth to 32
+            Set pbFixedWidth to True
+            Set peAlign to alignLeft
+            Set pbNewLine to True
+            Set psCSSClass to "RowDetail"
+            
+        End_Object
+        
+        Object oCustomer_City is a cWebColumn
+            Set psCaption to "City, State, Zip"
+            Set piWidth to 991
+            Set psCSSClass to "RowDetail"
+            Set peWordBreak to wbEllipsis
+            Procedure OnSetCalculatedValue String ByRef sValue
+                Move (Customer.City - "," * Customer.State - "," * Customer.Zip) to sValue
+            End_Procedure
+        End_Object
+        
+        Object oCustomerBalance is a cWebColumn
+            Entry_Item Customer.Balance
+            Set psCaption to "Balance Due"
+            Set piWidth to 106
+            Set pbFixedWidth to True
+            Set psCSSClass to "RowDetail"
+        End_Object
+        
+        Object oWebListExpandPanel1 is a cWebListExpandPanel
+            Set piColumnCount to 12
+            Set psCSSClass to "NoWhitespace"
+            Set peMode to wleManual
+            
+            Object oOrdersList is a cWebList
+                Set piColumnSpan to 0
+                Set pbServerOnRowClick to True
+                Set psCSSClass to "MobileList SubList"
+                Set piSortColumn to 0
+                Set pbReverseOrdering to True
+                Set pbShowHeader to False
+                Set psPlaceHolder to "No orders"
+                Set pbScroll to False
+                Set piLimitRows to 4
+                Set Server to oOrderHeaderDataDictionary
+                Set pbShowSelected to False
+                
+                Object oOrderHeaderOrder_Number is a cWebColumn
+                    Entry_Item OrderHeader.Order_Number
+                    Set psCaption to "Order Number"
+                    Set piWidth to 80
+                    
+                    Set psCSSClass to "RowCaption"
+                    Set peAlign to alignLeft
+                End_Object
+                
+                Object oOrderDate is a cWebColumn
+                    Entry_Item OrderHeader.Order_Date
+                    Set psCaption to "Order Date"
+                    Set psCSSClass to "RowCaption"
+                    Set piWidth to 110
+                    Set pbFixedWidth to True
+                End_Object
+                
+                Object oOrderHeaderOrder_Total is a cWebColumn
+                    Entry_Item OrderHeader.Order_Total
+                    Set psCaption to "Price"
+                    Set piWidth to 100
+                    Set peAlign to alignRight
+                    Set psCSSClass to "RowCaption"
+                End_Object
+                
+                Object oSalesPName is a cWebColumn
+                    Set psCaption to "Sales Person"
+                    Set piWidth to 262
+                    Set piListColSpan to 3
+                    Set pbNewLine to True
+                    Set psCSSClass to "RowDetail"
+                    Procedure OnSetCalculatedValue String ByRef sValue
+                        Move ("by: " + Trim(SalesPerson.ID) + " - " + Trim(SalesPerson.Name)) to sValue
+                    End_Procedure
+                End_Object                
+                
+                WebRegisterPath ntNavigateForward oZoomOrder
+                
+                Procedure OnRowClick String sRowID
+                    Send NavigatePath
+                End_Procedure
+                
+                Procedure OnGetNavigateForwardData tWebNavigateData ByRef NavigateData Handle hoToView
+                    Move True to NavigateData.bReadOnly
+                End_Procedure
+            End_Object
+
+            Object oDetailsBtn   is a cWebButton
+                Set piColumnSpan to 6
+                Set psCaption to "Customer details"
+                Set psCSSClass to "AsAnchor"
+                Set peAlign to alignLeft
+                
+                WebRegisterPath ntNavigateForward oZoomCustomer
+                
+                Procedure OnClick
+                    Send NavigatePath
+                End_Procedure
+
+                Procedure OnGetNavigateForwardData tWebNavigateData  ByRef NavigateData Handle hoToView
+                    Move True to NavigateData.bReadOnly
+                End_Procedure
+            End_Object
+
+            Object oViewMoreBtn is a cWebButton
+                Set psCaption to "View more"
+                Set psCSSClass to "AsAnchor"
+                Set peAlign to alignRight
+                Set piColumnSpan to 6
+                Set piColumnIndex to 6
+                
+                WebRegisterPath ntNavigateForward oSelectOrder
+                
+                Procedure OnClick
+                    Send NavigatePath
+                End_Procedure
+            End_Object
+        End_Object
+        
+        Procedure OnRowClick String sRowId
+            String sExpandedRowId
+            
+            WebGet psExpandedRow of oWebListExpandPanel1 to sExpandedRowId
+            
+            If (sExpandedRowId <> sRowId) Begin
+                Send ExpandRow of oWebListExpandPanel1 sRowId
+            End
+            Else Begin
+                Send Collapse of oWebListExpandPanel1
+            End
+        End_Procedure
+        
+        Procedure OnChangeCurrentRow String sFromRowID String sToRowID
+            String sExpandedRowId
+            
+            WebGet psExpandedRow of oWebListExpandPanel1 to sExpandedRowId
+            
+            If (sExpandedRowId <> sToRowID) Begin
+                Send Collapse of oWebListExpandPanel1
+            End
+        End_Procedure
+        
+        Procedure OnGetNavigateForwardData tWebNavigateData ByRef NavigateData Handle hoToView
+            Move True to NavigateData.bReadOnly
+        End_Procedure
+        
+    End_Object
+    
+    Object oActionGroup is a cWebMenuGroup
+        
+        Object oSearch is a cWebMenuItem
+            Set psCSSClass to "WebPromptMenuItem"
+            Set psCaption to "Search"
+            
+            Procedure OnClick
+                Send Search of oList
+            End_Procedure
+            
+        End_Object
+        
+        Object oNewButton is a cWebMenuItem
+            Set psCSSClass to "WebClearMenuItem"
+            Set psCaption to "New Customer"
+            
+            WebRegisterPath ntNavigateForward oZoomCustomer Self "NewCustomer"
+            
+            Procedure OnClick
+                Send NavigatePath
+            End_Procedure
+            
+            Procedure OnGetNavigateForwardData tWebNavigateData ByRef NavigateData Handle hoToView
+                Move True to NavigateData.bNewRecord
+            End_Procedure
+        End_Object
+    End_Object
+    
+    Procedure OnNavigateForward tWebNavigateData NavigateData Integer hoInvokingView Integer hoInvokingObject
+        WebSet pbRender of oNewButton to True
+        
+        Case Begin
+            Case (NavigateData.eNavigateType=nfFromParent)
+                // If from parent, this is a constrained drill down
+                // If Row select does main-zoom we don't need this
+                Case Break
+            
+            Case (NavigateData.eNavigateType=nfFromChild)
+                // If from child, this is a probably a parent lookup from a Zoom
+                Case Break
+            
+            Case (NavigateData.eNavigateType=nfFromMain)
+                // If from main, this is a probably a main-file lookup from a Zoom
+                Case Break
+            
+            Case Else // must be nfUndefined
+                // This may be the start of a drilldown query or this may be used for some kind of custom query.
+                // If Row select does main-zoom we don't need this
+                
+        Case End
+        
+    End_Procedure
+End_Object
+

@@ -1,0 +1,94 @@
+﻿Use cWebView.pkg
+Use cWebPanel.pkg
+Use cWebButton.pkg
+Use cWebPromptList.pkg
+Use cWebColumn.pkg
+Use cWebLabel.pkg
+
+Object oSelectStandardComments is a cWebView
+    Set psCaption to "Customer Comment Phrases"
+    Set pbShowCaption to False
+    Set piWidth to 600
+    Set piColumnCount to 6
+    Set peViewType to vtSelect
+    Property Handle phoValTable
+    Property String psSeedValue
+    
+    Property String[] pStandardComments
+
+    Set peStateMode to vsmOff
+    
+    WebSetResponsive piColumnCount rmTabletPortrait to 3
+    WebSetResponsive piWidth rmTabletPortrait to 0
+    
+    Object oHeader is a cWebLabel
+        Set piColumnSpan to 0
+        Set psCaption to "You can select a standard comment from the list below. This will be added to customer comment along with a date stamp."
+        Set psCSSClass to "LabelDetail"
+    End_Object
+    
+    Object oList is a cWebList
+        
+        Set pbServerOnRowClick to True
+        Set piColumnSpan to 0
+        Set pbFillHeight to True
+        Set pbShowHeader to False
+        Set psCSSClass to "MobileList"
+        Set pbDataAware to False
+        
+        
+        WebSetResponsive piColumnSpan rmTabletPortrait to 0
+        
+        Object oValId is a cWebColumn
+            Set psCaption to "Standard Comment"
+            Set pbFixedWidth to True
+            Set psCSSClass to "RowCaption"
+        End_Object
+        
+        Procedure OnRowClick String sRowID
+            Send OnListSelect
+        End_Procedure
+        
+        Procedure OnManualLoadData tWebRow[] ByRef aTheRows String ByRef sCurrentRowID
+            String[] Comments
+            Integer i
+            Get pStandardComments to Comments
+            For i From 0 to (SizeOfArray(Comments)-1)
+                Move i to aTheRows[i].sRowID
+                Move Comments[i]  to aTheRows[i].aCells[0].sValue
+            Loop
+        End_Procedure
+        
+        Procedure OnListSelect
+            Send NavigateClose Self
+        End_Procedure
+        
+        Procedure OnGetNavigateBackData tWebNavigateData ByRef NavigateData Handle hoBackToView
+            String sRowId
+            String[] Comments
+            Get pStandardComments to Comments
+            WebGet psCurrentRowID to sRowId // this will be the array index
+            // pass selected value back in name value pair
+            Get NamedValueAdd NavigateData.NamedValues "value" (Comments[Integer(sRowId)]) to NavigateData.NamedValues
+        End_Procedure
+        
+    End_Object
+    
+    
+    Procedure LoadStandardComments
+        String[] StandardComments
+        Move "New Customer"  to StandardComments[0]
+        Move "Customer Contact follow up" to StandardComments[1]
+        Move "Payment Problems"  to StandardComments[2]
+        Move "Gold star customer rating"  to StandardComments[3]
+        Move "Account Suspended"  to StandardComments[4]
+        Set pStandardComments to StandardComments
+    End_Procedure
+    
+    Procedure OnLoad
+        Send GridRefresh of oList
+    End_Procedure
+    
+    Send LoadStandardComments
+End_Object
+

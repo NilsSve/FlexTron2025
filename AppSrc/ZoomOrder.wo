@@ -1,0 +1,416 @@
+﻿Use cWebView.pkg
+Use cWebPanel.pkg
+Use cWebForm.pkg
+Use cWebCombo.pkg
+Use cWebGrid.pkg
+Use cWebColumn.pkg
+Use cWebDateForm.pkg
+Use cWebButton.pkg
+Use cWebMenuGroup.pkg
+Use cWebMenuItem.pkg
+
+Use cVendorDataDictionary.dd
+Use cInventoryDataDictionary.dd
+Use cCustomerDataDictionary.dd
+Use cSalesPersonDataDictionary.dd
+Use cOrderHeaderDataDictionary.dd
+Use cOrderDetailDataDictionary.dd
+Use cWebGroup.pkg
+
+Register_Object oSelectSalesPerson
+
+Object oZoomOrder is a cWebView
+    Set psCaption to "Order Entry"
+    Set pbShowCaption to False
+    Set piMaxWidth to 1024
+    Set peViewType to vtZoom
+    Set psStateViewName to "Order"
+    
+    Set Verify_Save_msg to 0
+    Set pbFocusFirstOnShow to False
+    
+    Object oVendorDataDictionary is a cVendorDataDictionary
+    End_Object
+    
+    Object oInventoryDataDictionary is a cInventoryDataDictionary
+        Set DDO_Server to oVendorDataDictionary
+    End_Object
+    
+    Object oCustomerDataDictionary is a cCustomerDataDictionary
+    End_Object
+    
+    Object oSalesPersonDataDictionary is a cSalesPersonDataDictionary
+    End_Object
+    
+    Object oOrderHeaderDataDictionary is a cOrderHeaderDataDictionary
+        Set DDO_Server to oCustomerDataDictionary
+        Set DDO_Server to oSalesPersonDataDictionary
+    End_Object
+    
+    Object oOrderDetailDataDictionary is a cOrderDetailDataDictionary
+        Set DDO_Server to oOrderHeaderDataDictionary
+        Set DDO_Server to oInventoryDataDictionary
+        Set Constrain_File to OrderHeader.File_Number
+    End_Object
+    
+    Set Main_DD to oOrderHeaderDataDictionary
+    Set Server  to oOrderHeaderDataDictionary
+    
+    Object oWebMainPanel is a cWebPanel
+        Set piColumnCount to 12
+        WebSetResponsive piColumnCount rmMobile to 6
+        
+        Object oWebGroup1 is a cWebGroup
+            Set piColumnCount to 12
+            Set piColumnSpan to 8
+            Set pbShowBorder to False
+            Set pbShowCaption to False
+            
+            Object oCustomerCustomer_Number is a cWebForm
+                Entry_Item Customer.Customer_Number
+                Set piColumnSpan to 3
+                Set piColumnIndex to 0
+                Set psLabel to "Customer"
+                Set peAlign to alignLeft
+                Set pbPromptButton to True
+                Set peLabelPosition to lpTop
+                
+                WebRegisterPath ntNavigateForward oSelectCustomer
+                
+                Procedure OnPrompt
+                    Send NavigatePath
+                End_Procedure
+            End_Object
+            
+            Object oCustomerName is a cWebForm
+                Entry_Item Customer.Name
+                Set piColumnSpan to 9
+                Set piColumnIndex to 3
+                Set pbPromptButton to True
+                Set peLabelPosition to lpTop
+                
+                WebRegisterPath ntNavigateForward oSelectCustomer
+                
+                Procedure OnPrompt
+                    Send NavigatePath
+                End_Procedure
+            End_Object
+            
+            Object oCustomerAddress is a cWebForm
+                Entry_Item Customer.Address
+                Set piColumnSpan to 12
+                Set piColumnIndex to 0
+                Set psLabel to "Address"
+                Set peLabelPosition to lpTop
+                Set pbShowLabel to False
+                
+                WebSetResponsive pbRender rmMobile to False
+            End_Object
+            
+            Object oCustomerCity is a cWebForm
+                Entry_Item Customer.City
+                Set piColumnSpan to 5
+                Set piColumnIndex to 0
+                Set psLabel to "City"
+                Set peLabelAlign to alignRight
+                Set pbShowLabel to False
+                
+                WebSetResponsive pbRender rmMobile to False
+            End_Object
+            
+            Object oCustomerState is a cWebForm
+                //Entry_Item Customer.State
+                Set piColumnSpan to 4
+                Set piColumnIndex to 5
+                Set psLabel to "State"
+                Set peLabelAlign to alignRight
+                Set pbShowLabel to False
+                // we want to show the State name based on the state code. Since this will never be
+                // enabled, we can do this by asking the DDO
+                Set pbEnabled to False
+                Procedure OnSetCalculatedValue String ByRef sValue
+                    Get Field_Current_Description of oCustomerDataDictionary (RefTable(Customer.State)) to sValue
+                End_Procedure
+                
+                WebSetResponsive pbRender rmMobile to False
+            End_Object
+            
+            Object oCustomerZip is a cWebForm
+                Entry_Item Customer.Zip
+                Set piColumnSpan to 3
+                Set piColumnIndex to 9
+                Set psLabel to "Zip"
+                Set peLabelAlign to alignRight
+                Set pbShowLabel to False
+                
+                WebSetResponsive pbRender rmMobile to False
+            End_Object
+        End_Object
+        
+        Object oWebGroup2 is a cWebGroup
+            Set piColumnCount to 1
+            Set piColumnSpan to 3
+            Set piColumnIndex to 9
+            Set pbShowBorder to False
+            Set pbShowCaption to False
+            
+            WebSetResponsive piColumnCount rmMobile to 2
+            WebSetResponsive piColumnSpan rmMobile to 0
+            
+            Object oOrderHeaderOrder_Date is a cWebDateForm
+                Entry_Item OrderHeader.Order_Date
+                Set piColumnSpan to 1
+                Set piColumnIndex to 0
+                Set psLabel to "Date & Total"
+                Set peLabelPosition to lpTop
+            End_Object
+            
+            Object oOrderHeader_Order_Total is a cWebForm
+                Entry_Item OrderHeader.Order_Total
+                Set psLabel to ""
+                Set piColumnIndex to 0
+                Set piColumnSpan to 1
+                Set peLabelPosition to lpTop
+                Set pbShowLabel to False
+                Set peAlign to alignLeft
+                
+                WebSetResponsive piColumnIndex rmMobile to 1
+                WebSetResponsive pbShowLabel rmMobile to True
+                
+            End_Object
+        End_Object
+        
+        Object oOrderHeaderOrdered_By is a cWebForm
+            Entry_Item OrderHeader.Ordered_By
+            Set piColumnSpan to 4
+            Set psLabel to "Ordered By"
+            Set peLabelPosition to lpTop
+        End_Object
+        
+        Object oSalesPID is a cWebForm
+            Entry_Item SalesPerson.ID
+            Set piColumnSpan to 2
+            Set psLabel to "Salesperson"
+            Set pbPromptButton to True
+            Set peLabelPosition to lpTop
+            Set piColumnIndex to 4
+            
+            WebSetResponsive piColumnIndex rmMobile to 0
+            
+            WebRegisterPath ntNavigateForward oSelectSalesPerson
+            
+            Procedure OnPrompt
+                Send NavigatePath
+            End_Procedure
+        End_Object
+        
+        Object oSalesP_Name is a cWebForm
+            Entry_Item SalesPerson.Name
+            Set piColumnSpan to 6
+            Set piColumnIndex to 6
+            Set peLabelPosition to lpTop
+            
+            WebSetResponsive piColumnIndex rmMobile to 2
+            WebSetResponsive piColumnSpan rmMobile to 0
+        End_Object
+        
+        Object oOrderHeaderTerms is a cWebCombo
+            Entry_Item OrderHeader.Terms
+            Set piColumnSpan to 4
+            Set piColumnIndex to 0
+            Set psLabel to "Terms"
+            Set peLabelPosition to lpTop
+        End_Object
+        
+        Object oOrderHeaderShip_Via is a cWebCombo
+            Entry_Item OrderHeader.Ship_Via
+            Set piColumnSpan to 4
+            Set piColumnIndex to 8
+            Set psLabel to "Ship Via"
+            Set peLabelPosition to lpTop
+        End_Object
+        
+        Object oNewItem_Btn is a cWebButton
+            Set piColumnSpan to 2
+            Set psCaption to "Add Line"
+            Set piColumnIndex to 0
+            Set Server to oOrderDetailDataDictionary
+            
+            WebRegisterPath ntNavigateForward oZoomOrderDetail Self "NewLine"
+            
+            Procedure OnClick
+                Send NavigatePath
+            End_Procedure
+            
+            Procedure OnGetNavigateForwardData tWebNavigateData ByRef NavigateData Handle hoToView
+                Move True to NavigateData.bSaveBeforeNavigate
+                Move True to NavigateData.bNewRecord
+            End_Procedure
+            
+            Procedure Refresh Integer eMode
+                Boolean bReadOnly bSynching
+                Get AppSynching to bSynching
+                // Do not perform this action while synchronizing DDOs to the client
+                If (not(bSynching)) Begin
+                    Get IsViewReadOnly to bReadOnly
+                    WebSet pbEnabled to (not(bReadOnly))
+                End
+                
+            End_Procedure
+        End_Object
+        
+        Object oDetailGrid is a cWebList
+            Set Server to oOrderDetailDataDictionary
+            Set piColumnSpan to 12
+            Set piMinHeight to 200
+            Set pbServerOnRowClick to True
+            Set pbScroll to False
+            
+            Object oInventoryItem_ID is a cWebColumn
+                Entry_Item Inventory.Item_ID
+                Set psCaption to "Item ID"
+                Set piWidth to 180
+                WebSetResponsive piWidth rmMobile to 130
+            End_Object
+            
+            Object oInventoryDescription is a cWebColumn
+                Entry_Item Inventory.Description
+                Set psCaption to "Description"
+                Set piWidth to 300
+                WebSetResponsive pbRender rmMobile to False
+            End_Object
+            
+            Object oInventoryUnit_Price is a cWebColumn
+                Entry_Item Inventory.Unit_Price
+                Set psCaption to "Unit Price"
+                Set piWidth to 120
+                WebSetResponsive pbRender rmMobile to False
+            End_Object
+            
+            Object oOrderDetailPrice is a cWebColumn
+                Entry_Item OrderDetail.Price
+                Set psCaption to "Price"
+                Set piWidth to 90
+            End_Object
+            
+            Object oOrderDetailQty_Ordered is a cWebColumn
+                Entry_Item OrderDetail.Qty_Ordered
+                Set psCaption to "Qty"
+                Set piWidth to 90
+                WebSetResponsive piWidth rmMobile to 50
+            End_Object
+            
+            Object oOrderDetailExtended_Price is a cWebColumn
+                Entry_Item OrderDetail.Extended_Price
+                Set psCaption to "Total"
+                Set piWidth to 115
+            End_Object
+            
+            WebRegisterPath ntNavigateForward oZoomOrderDetail
+            
+            Procedure OnRowClick String sRowID
+                Send NavigatePath
+            End_Procedure
+            
+            Procedure OnGetNavigateForwardData tWebNavigateData ByRef NavigateData Handle hoToView
+                Get IsViewReadOnly to NavigateData.bReadOnly
+                Move True to NavigateData.bSaveBeforeNavigate
+            End_Procedure
+            
+        End_Object
+        
+    End_Object
+    
+    Object oActionGroup is a cWebMenuGroup
+        
+        Object oSaveBtn is a cWebMenuItem
+            Set psCaption to "Save"
+            Set psCSSClass to "WebSaveMenuItem"
+            
+            Procedure OnClick
+                Send Request_Save
+            End_Procedure
+        End_Object
+        
+        Object oEditBtn is a cWebMenuItem
+            Set psCaption to "Edit"
+            Set psCSSClass to "WebEditMenuItem"
+            Procedure OnClick
+                Send ChangeEditMode True
+                Send SetActionButtons
+            End_Procedure
+        End_Object
+        
+        Object oNewBtn is a cWebMenuItem
+            Set psCaption to "New Order"
+            Set psCSSClass to "WebClearMenuItem"
+            
+            Procedure OnClick
+                Send ChangeEditMode True
+                Send Request_Clear
+                Send SetActionButtons
+            End_Procedure
+        End_Object
+        
+        Object oDeleteBtn is a cWebMenuItem
+            Set psCaption to "Delete Order"
+            Set peActionDisplay to adMenu
+            
+            Procedure OnClick
+                Send Request_Delete
+            End_Procedure
+        End_Object
+        
+    End_Object
+    
+    Procedure SetActionButtons
+        tWebNavigateData NavigateData
+        Boolean bHasRecord
+        Handle hoDD
+        String sTitle
+        
+        Get Server to hoDD
+        Get GetNavigateData to NavigateData
+        Get HasRecord of hoDD to bHasRecord
+        
+        WebSet pbRender of oNewBtn to True
+        WebSet pbRender of oSaveBtn to False
+        WebSet pbRender of oEditBtn to False
+        WebSet pbRender of oDeleteBtn to False
+        
+        If (NavigateData.bReadOnly) Begin
+            WebSet pbRender of oEditBtn to True
+        End
+        Else Begin
+            WebSet pbRender of oSaveBtn to True
+            WebSet pbRender of oDeleteBtn to bHasRecord
+        End
+        
+        If bHasRecord Begin
+            Move ("Order" * String(OrderHeader.Order_Number)) to sTitle
+        End
+        Else Begin
+            Move "New Order" to sTitle
+        End
+        Send SetBreadcrumbCaption sTitle
+        Send SetHeaderCaption sTitle
+    End_Procedure
+    
+    Procedure OnViewCleared Handle hoDDO
+        Send SetBreadcrumbCaption "New Order"
+    End_Procedure
+    
+    Procedure OnViewDeleted Handle hoDDO
+        Send NavigateCancel
+    End_Procedure
+    
+    Procedure OnViewSaved Handle hoServer Boolean bChanged
+        Send NavigateClose Self
+    End_Procedure
+    
+    Procedure OnNavigateForward tWebNavigateData NavigateData Handle hoInvokingView Handle hoInvokingObject
+        Send SetActionButtons
+    End_Procedure
+End_Object
+
+

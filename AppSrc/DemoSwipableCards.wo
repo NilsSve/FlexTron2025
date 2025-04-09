@@ -1,0 +1,194 @@
+﻿Use cWebView.pkg
+Use cWebPanel.pkg
+Use cWebForm.pkg
+Use cWebGroup.pkg
+Use cWebMenuGroup.pkg
+Use cWebMenuItem.pkg
+Use cWebCardContainer.pkg
+Use cWebCard.pkg
+Use cWebHtmlBox.pkg
+
+Object oDemoSwipableCards is a cWebView
+    
+    // Your DDO structure will go here
+    
+    Set peWebViewStyle to wvsDrillDown
+    Set peViewType to vtZoom
+    Set pbShowCaption to False
+    Set Verify_Save_msg to 0 // don't confirm saves
+    
+    Set psCaption to "DemoSwipableCards"
+    
+    Set piMaxWidth to 1024
+    Set piColumnCount to 12
+    
+    // add action menu items here
+    // we've included some common buttons
+    
+    Object oActionGroup is a cWebMenuGroup
+        Set psGroupName to "MainActions"
+        
+        Object oSaveBtn is a cWebMenuItem
+            Set psCaption to C_$Save
+            Set psCSSClass to "WebSaveMenuItem"
+            
+            Procedure OnClick
+                Send Request_Save
+            End_Procedure
+        End_Object
+        
+        Object oEditBtn is a cWebMenuItem
+            Set psCaption to C_$CategoryEdit
+            Set psCSSClass to "WebEditMenuItem"
+            Procedure OnClick
+                Send ChangeEditMode True
+                Send SetActionButtons
+            End_Procedure
+        End_Object
+        
+        Object oDeleteBtn is a cWebMenuItem
+            Set psCaption to C_$Delete
+            Set psCSSClass to "WebDeleteMenuItem"
+            Set peActionDisplay to adMenu
+            
+            Procedure OnClick
+                Send Request_Delete
+            End_Procedure
+        End_Object
+        
+        Object oCancelChangesBtn is a cWebMenuItem
+            
+            Set psCaption to C_$ToolTipClear
+            Set peActionDisplay to adMenu
+            
+            Procedure OnClick
+                // this will undo any unchanged saves and show the latest
+                Send RefreshRecord
+            End_Procedure
+        End_Object
+        
+    End_Object
+    
+    // This can be used to show and hide buttons based on context. This can be called
+    // any time the view is active.
+    Procedure SetActionButtons
+        tWebNavigateData NavigateData
+        Boolean bHasRecord
+        Handle hoDD
+        
+        Get Server to hoDD
+        Get GetNavigateData to NavigateData
+        
+        If (hoDD) Begin
+            Get HasRecord of hoDD to bHasRecord
+        End
+        Else Begin
+            Move False to bHasRecord
+        End
+        
+        // let's hide all buttons and then show the ones we want
+        WebSet pbRender of oEditBtn to False
+        WebSet pbRender of oSaveBtn to False
+        WebSet pbRender of oCancelChangesBtn to False
+        WebSet pbRender of oDeleteBtn to False
+        
+        If (NavigateData.bReadOnly) Begin
+            WebSet pbRender of oEditBtn to True
+        End
+        Else Begin
+            WebSet pbRender of oSaveBtn to True
+            WebSet pbRender of oCancelChangesBtn to True
+            WebSet pbRender of oDeleteBtn to bHasRecord
+        End
+    End_Procedure
+    
+    // this will close the view after a save
+    Procedure OnViewSaved Handle hoServer Boolean bChanged
+        Send NavigateClose Self
+    End_Procedure
+    
+    // this will close the view after a delete
+    Procedure OnViewDeleted Handle hoDDO
+        Send NavigateClose Self
+    End_Procedure
+    
+    // Add code to customize your Zoon View based on how it was invoked.
+    // Use NavigateData to determine the context this view will be used in.
+    
+    Procedure OnNavigateForward tWebNavigateData NavigateData Integer hoInvokingView Integer hoInvokingObject
+        
+        // if this view is being used in multiple contexts you may need a block of code
+        // like this to handle customizations. This would include hiding rows and buttons
+        // (WebSet pbRender) and changing the values of various captions.
+        
+        Case Begin
+            Case (NavigateData.eNavigateType=nfFromMain)
+                // If from main, this is a propbably a main file Select to Zoom.
+                // This is the most typical way to navigate to a zoom.
+                Case Break
+            
+            Case (NavigateData.eNavigateType=nfFromParent)
+                // If from parent, this is a constrained drill down.
+                // If needed you could check NaviateData.iTable to determine the constraining parent.
+                // This would be unusual - normally you drill down from a parent to a list (Select view).
+                Case Break
+            
+            Case (NavigateData.eNavigateType=nfFromChild)
+                // If from child, this is a probably a parent Zoom from a Zoom.
+                // This is unusual but it might be used for adding a new child record.
+                Case Break
+            
+            Case Else // must be nfUndefined
+                // This may be the start of a query or this may be used for some kind of
+                // custom operation. You may want to check NavigateData.NamedValues.
+                
+        Case End
+        
+        // Action buttons can be changed dynamically during a Zoom's display lifetime. It is
+        // best to set these buttons in their own procedure so you can change later.
+        Send SetActionButtons
+        
+    End_Procedure
+    
+    Object oWebCardContainer1 is a cWebCardContainer
+        Set pbSwipeCards to True
+        Set pbFillHeight to True
+        Set psCSSClass to "WithBullets"
+        
+        Object oWebCard1 is a cWebCard
+            Set piColumnCount to 12
+            
+            Object oWebHtmlBox1 is a cWebHtmlBox
+                Set piColumnSpan to 0
+                Set psHtml to "<h1>Information part 1</h1><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec quis blandit ipsum. Nullam fringilla sem in dolor volutpat, eu consequat nibh tristique. Fusce condimentum enim volutpat, semper ante a, posuere erat. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam venenatis neque sodales, gravida ante viverra, condimentum risus. Vestibulum et massa facilisis leo porta laoreet eu sed dui. In convallis cursus tortor et aliquam. In feugiat ex in lectus tristique, ut eleifend elit bibendum. Nulla dignissim urna ante, ut feugiat metus bibendum a. Ut vel turpis ullamcorper nunc interdum rhoncus. Nullam eleifend nisl eget justo posuere congue.</p><p>Fusce vitae nibh ante. Nunc tincidunt leo neque, et feugiat ipsum aliquet eget. Sed lorem est, sagittis et tortor at, condimentum congue nisi. Maecenas laoreet, nisi in aliquam consectetur, sapien nibh sodales nisl, sodales scelerisque orci lorem a nisi. Proin fermentum sodales auctor. Integer commodo elementum orci, at luctus urna aliquet at. In condimentum purus vitae lectus imperdiet finibus. Pellentesque id nisi vel metus suscipit suscipit. Nunc fermentum vestibulum gravida.</p>"
+                Set pbScroll to False
+            End_Object
+            
+        End_Object
+        
+        Object oWebCard2 is a cWebCard
+            Set piColumnCount to 12
+            
+            Object oWebHtmlBox1 is a cWebHtmlBox
+                Set piColumnSpan to 0
+                Set psHtml to "<h1>Information part 2</h1><p>Quisque accumsan condimentum elit eu aliquam. Aenean cursus mattis lacus, sit amet lacinia ligula accumsan vel. Aliquam dictum quam sed tellus bibendum, at placerat odio fermentum. Fusce gravida commodo metus ut elementum. Nunc luctus feugiat tellus a tempus. Morbi molestie lacus non dui viverra maximus. Proin id lacus vitae est sodales dapibus. Proin turpis elit, finibus sed libero et, vehicula semper tellus. Aliquam scelerisque turpis nulla. In placerat tortor ut quam facilisis egestas. Mauris finibus ultricies lacinia. Donec luctus vel nunc sed varius. Aenean id cursus ante, vel varius tellus. Aliquam velit arcu, ullamcorper ornare nunc sit amet, sollicitudin placerat massa. Suspendisse ut condimentum felis, at bibendum sem.</p><p>Sed ac vestibulum nunc. Integer nulla mi, aliquam in nulla nec, malesuada rutrum sapien. Aliquam posuere finibus sodales. Vivamus convallis auctor sollicitudin. Sed id ullamcorper orci. Integer vestibulum, nunc a commodo porttitor, ante lectus tempus tellus, iaculis molestie ipsum nunc sed nisi. Nullam in maximus tortor. Donec posuere neque varius leo ullamcorper, vel faucibus turpis finibus. Vivamus eget neque fermentum, luctus nisi mollis, varius turpis. Donec pretium neque ac sapien lobortis blandit. Phasellus scelerisque tortor nec tortor faucibus pellentesque. Vivamus porttitor convallis consectetur. Maecenas commodo, turpis sed dapibus luctus, tortor odio ornare libero, et feugiat nisi massa sed mauris. Integer tristique faucibus orci, id pharetra mauris lacinia vel. Praesent est erat, molestie quis justo ut, bibendum pretium nisl. Quisque vel interdum tortor, ut elementum ipsum.</p>"
+                Set pbScroll to False
+            End_Object
+            
+        End_Object
+        
+        Object oWebCard3 is a cWebCard
+            Set piColumnCount to 12
+            
+            Object oWebHtmlBox1 is a cWebHtmlBox
+                Set piColumnSpan to 0
+                Set psHtml to "<h1>Information part 3</h1><p>Phasellus maximus erat semper porta cursus. In est urna, cursus in dignissim molestie, venenatis a arcu. Praesent malesuada, augue sit amet rutrum gravida, nisi neque aliquet eros, nec lobortis nisl lectus vitae enim. Mauris aliquam mi sed arcu elementum placerat. Nam sodales convallis ipsum sit amet porttitor. Aenean ullamcorper sem sed felis viverra tristique. Nulla sem ex, blandit tempor tincidunt maximus, porta non odio. Nullam vitae posuere nibh.</p>"
+                Set pbScroll to False
+            End_Object
+            
+        End_Object
+    End_Object
+    
+End_Object
+
+

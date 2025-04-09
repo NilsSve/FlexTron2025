@@ -1,0 +1,317 @@
+﻿Use cWebView.pkg
+Use cWebPanel.pkg
+Use cWebForm.pkg
+Use cWebButton.pkg
+Use cWebMenuGroup.pkg
+Use cWebMenuItem.pkg
+Use cWebImage.pkg
+Use cWebGroup.pkg
+Use cWebFileUploadButton.pkg
+Use cWebSpacer.pkg
+
+Use cSalesPersonDataDictionary.DD
+
+Object oZoomSalesPerson is a cWebView
+    Set psCaption to "Sales Person"
+    Set pbShowCaption to False
+    Set piMaxWidth to 1024
+    Set peViewType to vtZoom
+    Set Verify_Save_msg to 0
+    Set psStateViewName to "SalesPerson"
+    
+    Object oSalesPersonDataDictionary is a cSalesPersonDataDictionary
+    End_Object
+    
+    Set Main_DD to oSalesPersonDataDictionary
+    Set Server  to oSalesPersonDataDictionary
+    
+    Object oWebMainPanel is a cWebPanel
+        Set piColumnCount to 12
+        
+        WebSetResponsive piColumnCount rmMobilePortrait to 6
+        WebSetResponsive piColumnCount rmMobileLandscape to 9
+        
+        Object oWebGroup1 is a cWebGroup
+            Set piColumnCount to 12
+            Set piColumnSpan to 6
+            Set pbShowBorder to False
+            Set pbShowCaption to False
+            
+            Object oSalesPID is a cWebForm
+                Entry_Item SalesPerson.ID
+                Set piColumnSpan to 6
+                Set piColumnIndex to 0
+                Set psLabel to "Sales Person ID"
+                Set peLabelAlign to alignLeft
+                Set peLabelPosition to lpTop
+            End_Object
+            
+            Object oSalesPName is a cWebForm
+                Entry_Item SalesPerson.Name
+                Set piColumnSpan to 12
+                Set piColumnIndex to 0
+                Set psLabel to "Sales Person Name"
+                Set peLabelAlign to alignLeft
+                Set peLabelPosition to lpTop
+            End_Object
+            
+            Object oWebSpacer1 is a cWebSpacer
+            End_Object
+        End_Object
+        
+        Object oWebImage1 is a cWebImage
+            Set piColumnSpan to 2
+            Set pbShowBorder to True
+            Set piColumnIndex to 10
+            Set piHeight to 180
+            Set pePosition to wiFit
+            
+            WebSetResponsive piColumnIndex rmMobileLandscape to 6
+            
+            Procedure Refresh Integer eMode
+                String sPath sUrl
+                
+                Forward Send Refresh eMode
+                
+                If (not(AppSynching(oLocalWebAppHost))) Begin
+                    // Determine local path
+                    Get SalesAvatarsFolder to sPath
+                    
+                    If (HasRecord(oSalesPersonDataDictionary)) Begin
+                        If (Trim(SalesPerson.Avatar) <> "") Begin
+                            Move (sPath + "\" + Trim(SalesPerson.Avatar)) to sPath
+                        End
+                        Else Begin
+                            Move (sPath + "\NONE.jpg") to sPath
+                        End
+                    End
+                    Else Begin
+                        Move (sPath + "\NEW.jpg") to sPath
+                    End
+                    
+                    Get DownloadURL of ghoWebResourceManager sPath to sUrl
+                    WebSet psURL to sUrl
+                End
+            End_Procedure
+            
+        End_Object
+        
+        //        Object oWebFileUploadButton1 is a cWebButton
+        //            Set piColumnSpan to 2
+        //            Set psCaption to "Upload Picture"
+        //            Procedure OnClick
+        //                Send ShowInfoBox "Image Uploads are disabled for this sample" "Upload Restricted"
+        //            End_Procedure
+        //            
+        //            Procedure Refresh Integer eMode
+        //                Boolean bReadOnly bSynching
+        //                Get AppSynching to bSynching
+        //                // Do not perform this action while synchronizing DDOs to the client
+        //                If (not(bSynching)) Begin
+        //                    Get IsViewReadOnly to bReadOnly
+        //                    WebSet pbEnabled to (not(bReadOnly) and HasRecord(oSalesPersonDataDictionary))
+        //                End
+        //                
+        //            End_Procedure
+        //            
+        //        End_Object
+        
+        
+        Object oWebFileUploadButton1 is a cWebFileUploadButton
+            Set piColumnSpan to 2
+            Set psCaption to "Upload Picture"
+            Set piColumnIndex to 10
+            Set phoDropZone to oWebImage1
+            Set pbMultiFile to False
+            Set psAccept to "image/*"
+            Set pbCapture to True
+
+            WebSetResponsive piColumnIndex rmMobileLandscape to 6
+
+            //  We store the file in the regular upload folder first (due to rights)
+            Function OnFileUpload String sFileName Integer iBytes String sMime Returns String
+                String sUploadPath sPath
+                Boolean bExists
+
+                // Determine local path based on workspace setting
+                Get UploadFolder True to sPath
+                Move (sPath + "\" + sFileName) to sPath
+
+                //  Remove existing file (only reason for a file being in this location would be an earlier failed attempt)
+                File_Exist sPath bExists
+                If (bExists) Begin
+                    EraseFile sPath
+                End
+
+                Function_Return sPath
+            End_Function
+
+            Procedure OnFileFinished String sFileName String sLocalPath
+                String sLocalFileName sExtension sPath
+                Handle hoSalesPersonDD
+                RowID riSalesPerson
+
+                Forward Send OnFileFinished sFileName sLocalPath
+
+                Move (Right(sFileName, Length(sFileName) - RightPos(".", sFileName))) to sExtension
+
+                // Determine local path based on workspace setting
+
+                If (sExtension <> "" and (HasRecord(oSalesPersonDataDictionary))) Begin
+                    //  Delete old avatar if available (as the extension could be different)
+                    If (Trim(SalesPerson.Avatar) <> "") Begin
+                        Get SalesAvatarsFolder to sPath
+                        Move (sPath + "\" + Trim(SalesPerson.Avatar)) to sPath
+                        EraseFile sPath
+                    End
+
+                    //  Move the uploaded file to the avatar folder
+                    Get SalesAvatarsFolder to sPath
+                    Move (sPath  + "\" - SalesPerson.ID - "." + sExtension) to sPath
+                    Copyfile sLocalPath to sPath
+                    EraseFile sLocalPath
+
+                    // Store the avatar file name:
+                    // In order not to affect other changes that could have been made (e.g. name) that may not be saved yet,
+                    // create a temporary DDO and save the new filename using it.
+                    Get Create (RefClass (cSalesPersonDataDictionary)) to hoSalesPersonDD
+                    Get CurrentRowId of oSalesPersonDataDictionary to riSalesPerson
+                    Send FindByRowId of hoSalesPersonDD SalesPerson.File_Number riSalesPerson 
+                    Set Field_Changed_Value of hoSalesPersonDD Field SalesPerson.Avatar to (SalesPerson.ID - "." + sExtension)
+                    Send Request_Save of hoSalesPersonDD
+                    Send Destroy of hoSalesPersonDD
+
+                    //  Refesh the image
+                    Send Refresh of oWebImage1 0
+                End
+                Else Begin
+                    EraseFile sLocalPath
+                End
+            End_Procedure
+   
+            Procedure Refresh Integer eMode
+                Boolean bReadOnly bSynching
+                Get AppSynching to bSynching
+                // Do not perform this action while synchronizing DDO's to the WebApp Client
+                If (not(bSynching)) Begin
+                    Get IsViewReadOnly to bReadOnly
+                    WebSet pbEnabled to (not(bReadOnly) and HasRecord(oSalesPersonDataDictionary))
+                End
+
+            End_Procedure
+        End_Object
+    End_Object
+    
+    Object oActionGroup is a cWebMenuGroup
+        
+        Object oSaveBtn is a cWebMenuItem
+            Set psCaption to "Save"
+            Set psCSSClass to "WebSaveMenuItem"
+            
+            Procedure OnClick
+                Send Request_Save
+            End_Procedure
+        End_Object
+        
+        Object oEditBtn is a cWebMenuItem
+            Set psCaption to "Edit"
+            Set psCSSClass to "WebEditMenuItem"
+            Procedure OnClick
+                Send ChangeEditMode True
+                Send SetActionButtons
+            End_Procedure
+        End_Object
+        
+        Object oDeleteBtn is a cWebMenuItem
+            Set psCaption to "Delete"
+            Set psCSSClass to "WebDeleteMenuItem"
+            Set peActionDisplay to adMenu
+            
+            Procedure OnClick
+                Send Request_Delete
+            End_Procedure
+        End_Object
+        
+        Object oCancelChangesBtn is a cWebMenuItem
+            
+            Set psCaption to "Clear Changes"
+            Set peActionDisplay to adMenu
+            
+            Procedure OnClick
+                Send RefreshRecord
+            End_Procedure
+        End_Object
+        
+    End_Object
+    
+    Procedure SetActionButtons
+        tWebNavigateData NavigateData
+        Boolean bHasRecord
+        Handle hoDD
+        
+        Get Server to hoDD
+        Get GetNavigateData to NavigateData
+        Get HasRecord of hoDD to bHasRecord
+        
+        WebSet pbRender of oEditBtn to False
+        WebSet pbRender of oSaveBtn to False
+        WebSet pbRender of oCancelChangesBtn to False
+        WebSet pbRender of oDeleteBtn to False
+        
+        If (NavigateData.bReadOnly) Begin
+            WebSet pbRender of oEditBtn to True
+        End
+        Else Begin
+            WebSet pbRender of oSaveBtn to True
+            WebSet pbRender of oCancelChangesBtn to True
+            WebSet pbRender of oDeleteBtn to bHasRecord
+        End
+    End_Procedure
+    
+    //
+    //  Determines the local file path where the sales person avatars are located.
+    //
+    Function SalesAvatarsFolder Returns String
+        String sPath
+        
+        Get UploadFolder False to sPath
+        Move (sPath + "\SalesAvatars") to sPath
+        
+        Function_Return sPath
+    End_Function
+    
+    //
+    //  Registers the folder where the avatars are located.
+    //
+    Procedure RegisterAvatarFolder
+        String sPath
+        
+        Get SalesAvatarsFolder to sPath
+        
+        Send RegisterDownloadFolder of ghoWebResourceManager sPath
+    End_Procedure
+    Send RegisterAvatarFolder
+    
+    Procedure OnViewSaved Handle hoDDO Boolean bChanged
+        Send NavigateClose Self
+    End_Procedure
+    
+    Procedure OnViewDeleted Handle hoDDO
+        Send NavigateClose Self
+    End_Procedure
+    
+    Procedure OnNavigateForward tWebNavigateData NavigateData Handle hoInvokingView Handle hoInvokingObject
+        Boolean bHasRecord
+        Get HasRecord of oSalesPersonDataDictionary to bHasRecord
+        If bHasRecord Begin
+            Send SetBreadcrumbCaption (Trim(SalesPerson.Name))
+        End
+        Else Begin
+            Send SetBreadcrumbCaption "New Sales Person"
+        End
+        
+        Send SetActionButtons
+    End_Procedure
+    
+End_Object
+

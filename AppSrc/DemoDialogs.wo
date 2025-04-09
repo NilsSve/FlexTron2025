@@ -1,0 +1,165 @@
+﻿Use cWebView.pkg
+Use cWebPanel.pkg
+Use cWebButton.pkg
+Use cWebHorizontalLine.pkg
+
+Use DemoQuestionDialog.wo
+
+
+Object oDemoDialogs is a cWebView
+    Set piMaxWidth to 400
+    Set psCaption to "Dialogs"
+    Set pbShowCaption to False
+    
+    Object oWebMainPanel is a cWebPanel
+        Set piColumnCount to 1
+        
+        Object oInfoBtn is a cWebButton
+            Set psCaption to "Standard Info Dialog"
+            
+            Procedure OnClick
+                Send ShowInfoBox "Hello world!"
+            End_Procedure
+        End_Object
+        
+        Object oConfirmBtn is a cWebButton
+            Set psCaption to "Standard Confirmation Dialog"
+            
+            Procedure ConfirmResponse Integer eConfirmMode
+                If (eConfirmMode = cmYes) Begin
+                    WebSet pbEnabled to False
+                End
+            End_Procedure
+            //  Publish the response method (Security!)
+            WebPublishProcedure ConfirmResponse
+            
+            Procedure OnClick
+                Send ShowYesNo (Self) (RefProc(ConfirmResponse)) "Are you sure you want to disable this button?" "Question title!"
+            End_Procedure
+        End_Object
+        
+        Object oCustomMessage is a cWebButton
+            Set psCaption to "Custom Message Box"
+            
+            Procedure CustomResponse Integer eBtn
+                Send ShowInfoBox ("You liked " + String(eBtn) + "!")
+            End_Procedure
+            //  Publish the response method (Security!)
+            WebPublishProcedure CustomResponse
+            
+            Procedure OnClick
+                String[] aButtons
+                
+                Move "One"      to aButtons[0]
+                Move "Two"      to aButtons[1]
+                Move "Three"    to aButtons[2]
+                Move "Four"     to aButtons[3]
+                
+                Send ShowMessageBox Self (RefProc(CustomResponse)) "Pick your favorite number!" "Multiple choice" "WebMsgBoxConfirm" 1  aButtons
+            End_Procedure
+        End_Object
+        
+        Object oYesNoCancelBtn is a cWebButton
+            Set piColumnSpan to 0
+            Set psCaption to "Yes No Cancel"
+            
+            Procedure HandleResponse Integer eBtn
+                If (eBtn = cmYes) Begin
+                    WebSet psCaption to ("Yes No Cancel" + " (Yes)")
+                End
+                If (eBtn = cmNo) Begin
+                    WebSet psCaption to ("Yes No Cancel" + " (No)")
+                End
+                If (eBtn = cmCancel) Begin
+                    WebSet psCaption to ("Yes No Cancel" + " (Cancel)")
+                End
+            End_Procedure
+            WebPublishProcedure HandleResponse
+            
+            Procedure OnClick
+                Send ShowYesNoCancel Self (RefProc(HandleResponse)) "Sure you clicked this?" "Confirm!" cmYes
+            End_Procedure
+        End_Object
+        
+        Object oWebHorizontalLine3 is a cWebHorizontalLine
+        End_Object
+        
+        
+        Object oCustomDialog is a cWebButton
+            Set psCaption to "Custom Question Dialog"
+            
+            // Standard dialog calls OnCloseModalDialog callback, upon completion
+            Procedure OnCloseModalDialog Handle hoModalDialog
+                Boolean bCancel
+                String sAnswer
+                Send GetAnswers of hoModalDialog (&sAnswer) (&bCancel)
+                If (bCancel) Begin
+                    Send ShowInfoBox ("You didn't want to answer did you?")
+                End
+                Else Begin
+                    Send ShowInfoBox ("Your name is '" + sAnswer + "'!!!")
+                End
+            End_Procedure
+            
+            Procedure OnClick
+                Send InitializeDialog of oDemoQuestionDialog "Question" "What is your name?"
+                Send Popup of oDemoQuestionDialog Self
+            End_Procedure
+            
+        End_Object
+        
+        Object oWebHorizontalLine1 is a cWebHorizontalLine
+        End_Object
+        
+        
+        Object oWebButton1 is a cWebButton
+            Set piColumnSpan to 0
+            Set psCaption to "Wait Dialog"
+            Set pbShowWaitDialog to True
+            
+            Procedure OnClick
+                Sleep 5
+            End_Procedure
+        End_Object
+        
+        Object oWebButton2 is a cWebButton
+            Set piColumnSpan to 0
+            Set psCaption to "Locked without dialog"
+            
+            Procedure OnClick
+                Sleep 5
+            End_Procedure
+        End_Object
+        
+        Object oWebHorizontalLine2 is a cWebHorizontalLine
+        End_Object
+        
+        Object oErrorDialog is a cWebButton
+            Set psCaption to "Standard Error Dialog"
+            
+            Procedure OnClick
+                Error 150 "Demo error message shown as unhandled error!"
+            End_Procedure
+        End_Object
+        
+        Object oUnhandledClientError is a cWebButton
+            Set piColumnSpan to 0
+            Set psCaption to "Clientside Error Dialog"
+            
+            Set psClientOnClick to "DoesNotExist"
+            Set pbServerOnClick to False
+        End_Object
+        
+        Object oUserErrorDialog is a cWebButton
+            Set psCaption to "User Error Dialog"
+            
+            Procedure OnClick
+                Send UserError "Friendly error message using the UserError procedure." "Friendly error message!"
+            End_Procedure
+        End_Object
+    End_Object
+End_Object
+
+
+
+

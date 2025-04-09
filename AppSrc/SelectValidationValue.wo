@@ -1,0 +1,134 @@
+﻿Use cWebView.pkg
+Use cWebPanel.pkg
+Use cWebButton.pkg
+Use cWebPromptList.pkg
+Use cWebColumn.pkg
+Use cWebMenuGroup.pkg
+Use cWebMenuItem.pkg
+
+Object oSelectValidationValue is a cWebView
+    
+    Property Handle phoValTable
+    Property String psSeedValue
+    
+    Set psCaption to "Validation Lookup"
+    Set pbShowCaption to False
+    Set piMaxWidth to 1024
+    Set piColumnCount to 6
+    Set peViewType to vtSelect
+    
+    WebSetResponsive piColumnCount rmTabletPortrait to 3
+    WebSetResponsive piWidth rmTabletPortrait to 0
+    
+    Object oList is a cWebList
+        Set piColumnSpan to 0
+        Set pbServerOnRowClick to True
+        Set pbFillHeight to True
+        Set pbShowHeader to False
+        Set psCSSClass to "MobileList"
+        Set pbDataAware to False
+        Set piSortColumn to 0
+        
+        WebSetResponsive piColumnSpan rmTabletPortrait to 0
+        
+        Object oValId is a cWebColumn
+            Set psCaption to "Id"
+            Set pbFixedWidth to True
+            Set piWidth to 50
+            Set piColumnSpan to 2
+            Set psCSSClass to "RowCaption"
+        End_Object
+        
+        Object oValDesc is a cWebColumn
+            Set psCaption to "Desc"
+            Set piWidth to 50
+            Set psCSSClass to "RowCaption"
+        End_Object
+        
+        
+        Procedure OnRowClick String sRowID
+            Send OnListSelect
+        End_Procedure
+        
+        // fill the list using the DD's validation table interface
+        Procedure OnManualLoadData tWebRow[] ByRef aTheRows String ByRef sCurrentRowID
+            Handle hoTable
+            Integer iRow iCount
+            Variant[][] aData
+            String sTitle
+            
+            Get phoValTable to hoTable
+            Get psSeedValue to sCurrentRowID
+            
+            // the DD knows the name of this validation table, use it.
+            Get Table_Title of hoTable to sTitle
+            Send SetBreadCrumbCaption sTitle
+            
+            Get TableData of hoTable to aData
+            Move (SizeOfArray(aData)) to iCount
+            For iRow From 0 to (iCount-1)
+                Move aData[iRow][0] to aTheRows[iRow].sRowID
+                Move aData[iRow][0] to aTheRows[iRow].aCells[0].sValue
+                Move aData[iRow][1] to aTheRows[iRow].aCells[1].sValue
+            Loop
+        End_Procedure
+        
+        Procedure OnListSelect
+            Send NavigateClose Self
+        End_Procedure
+        
+        // we will pass back a name value pair of "value", which the invoking object
+        // will use to update itself.
+        Procedure OnGetNavigateBackData tWebNavigateData ByRef NavigateData Handle hoBackToView
+            String sRowId
+            WebGet psCurrentRowID to sRowId
+            Get NamedValueAdd NavigateData.NamedValues "value" sRowId to NavigateData.NamedValues
+        End_Procedure
+        
+    End_Object
+    
+    
+    Procedure OnNavigateForward tWebNavigateData NavigateData Integer hoInvokingView Integer hoInvokingObject
+        Handle hoDD hoValTable
+        String sValue
+        Integer iTable iColumn
+        
+        Get Data_File of hoInvokingObject to iTable
+        Get Data_Field of hoInvokingObject to iColumn
+        Get Main_DD of hoInvokingObject to hoDD
+        If (hoDD=0 or iTable=0) Begin
+            Error DFERR_PROGRAM "Improper NavigateData passed to Validation List select"
+            Procedure_Return
+        End
+        
+        Get File_Field_Table_Object of hoDD iTable iColumn to hoValTable
+        If (hoValTable=0) Begin
+            Error DFERR_PROGRAM "There is no validation table for this"
+            Procedure_Return
+        End
+        
+        Get File_Field_Current_Value of hoDD iTable iColumn to sValue
+        Set psSeedValue to sValue
+        Set phoValTable to hoValTable
+        
+        Send GridRefresh of oList
+    End_Procedure
+    
+    
+    Object oActionGroup is a cWebMenuGroup
+        
+        Object oSearch is a cWebMenuItem
+            Set psCaption to "Search"
+            Set psCSSClass to "WebPromptMenuItem"
+            
+            Procedure OnClick
+                Send Search of oList
+            End_Procedure
+            
+        End_Object
+        
+    End_Object
+    
+    
+End_Object
+

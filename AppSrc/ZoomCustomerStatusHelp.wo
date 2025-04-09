@@ -1,0 +1,139 @@
+﻿Use cWebView.pkg
+Use cWebPanel.pkg
+Use cWebForm.pkg
+Use cWebGroup.pkg
+Use cWebMenuGroup.pkg
+Use cWebMenuItem.pkg
+Use cWebCheckBox.pkg
+Use cWebLabel.pkg
+Use cWebButton.pkg
+Use cWebSpacer.pkg
+
+Object oZoomCustomerStatusHelp is a cWebView
+    
+    // Your DDO structure will go here
+    
+    Set peWebViewStyle to wvsDrillDown
+    Set peViewType to vtZoom
+    Set pbShowCaption to False
+    Set Verify_Save_msg to 0 // don't confirm saves
+    
+    Set psCaption to "Customer Status Decider"
+    
+    Set piMaxWidth to 1024
+    Set piColumnCount to 12
+    Set peStateMode to vsmCustom
+    
+    Object oWebMainPanel is a cWebPanel
+        Set piColumnCount to 8
+        
+        Object oCustomerName is a cWebForm
+            Set piColumnSpan to 7
+            Set psLabel to "Customer Name"
+            Set peLabelPosition to lpTop
+            Set pbEnabled to False
+        End_Object
+        
+        Object oCustomerStatus is a cWebForm
+            Set piColumnSpan to 7
+            Set peLabelPosition to lpTop
+            Set psLabel to "Current Status"
+            Set pbEnabled to False
+        End_Object
+        
+        Object oWebLabel1 is a cWebLabel
+            Set psCaption to "Change the Customer Status?"
+            Set piColumnSpan to 11
+        End_Object
+        
+        Object oWebLabel2 is a cWebLabel
+            Set psCaption to "label"
+            Set piColumnSpan to 11
+            Set psCaption to "If you mark this customer as inactive, they will no longer receive helpful emails and friendly phone calls. They become dead to us."
+            Set psCSSClass to "LabelDetail"
+        End_Object
+        
+        Object oStatusYes is a cWebButton
+            Set piColumnSpan to 6
+            Set psCaption to "Active - Keep them in the list!"
+            
+            Procedure OnClick
+                Send NavigateClose Self
+            End_Procedure
+            
+            Procedure OnGetNavigateBackData tWebNavigateData ByRef NavigateData Handle hoBackToView
+                Get NamedValueAdd NavigateData.NamedValues "newstatus" "1" to NavigateData.NamedValues
+            End_Procedure
+        End_Object
+        
+        Object oWebSpacer1 is a cWebSpacer
+        End_Object
+        
+        Object oStatusNo is a cWebButton
+            Set piColumnSpan to 6
+            Set psCaption to "Inactive - They are gone"
+            
+            Procedure OnClick
+                Send NavigateClose Self
+            End_Procedure
+            Procedure OnGetNavigateBackData tWebNavigateData ByRef NavigateData Handle hoBackToView
+                Get NamedValueAdd NavigateData.NamedValues "newstatus" "0" to NavigateData.NamedValues
+            End_Procedure
+        End_Object
+        WebSetResponsive piColumnCount rmMobile to 6
+    End_Object
+    
+    
+    // Add code to customize your Zoon View based on how it was invoked.
+    // Use NavigateData to determine the context this view will be used in.
+    
+    Procedure OnNavigateForward tWebNavigateData NavigateData Integer hoInvokingView Integer hoInvokingObject
+        String sName sStatus sCustomStateHash
+        String[] aParts
+        
+        //  Check if we are restoring an existing state
+        //        Get CustomStateHash to sCustomStateHash
+        //        If (sCustomStateHash <> "") Begin
+        //            Move (StrSplitToArray(sCustomStateHash, "_")) to aParts
+        //            
+        //            If (SizeOfArray(aParts) > 1) Begin
+        //                Get GetNavigateData to NavigateData
+        //                
+        //                Get NamedValueAdd NavigateData.NamedValues "name" aParts[0] to NavigateData.NamedValues
+        //                Get NamedValueAdd NavigateData.NamedValues "status" aParts[1] to NavigateData.NamedValues
+        //                
+        //                Send SetNavigateData NavigateData
+        //            End
+        //        End
+        
+        Get NamedValueGet NavigateData.NamedValues "name" to sName
+        Get NamedValueGet NavigateData.NamedValues "status" to sStatus
+        If (sName="") Begin
+            Move "unknown name" to sName
+        End
+        WebSet psValue of oCustomerName to sName
+        If (sStatus="1") Begin
+            Move "Customer status is Active" to sStatus
+        End
+        Else Begin
+            Move "Customer is Inactive" to sStatus
+        End
+        WebSet psValue of oCustomerStatus to sStatus
+    End_Procedure
+    
+    
+    //    Procedure OnDefineCustomStateHash String ByRef sStateHash
+    //        String sName sStatus
+    //        tWebNavigateData NavigateData
+    //        
+    //        Get GetNavigateData to NavigateData
+    //        
+    //        Get NamedValueGet NavigateData.NamedValues "name" to sName
+    //        Get NamedValueGet NavigateData.NamedValues "status" to sStatus
+    //        
+    //        Move (sName - "_" + sStatus) to sStateHash
+    //        
+    //        
+    //    End_Procedure
+End_Object
+

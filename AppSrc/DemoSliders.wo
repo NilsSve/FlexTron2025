@@ -1,0 +1,253 @@
+﻿Use cWebView.pkg
+Use cWebPanel.pkg
+Use cWebTabContainer.pkg
+Use cWebTabPage.pkg
+Use cWebForm.pkg
+Use cWebLabel.pkg
+Use cWebSlider.pkg
+Use cWebGroup.pkg
+Use cWebButton.pkg
+
+Use cCustomerDataDictionary.dd
+Use cWebCombo.pkg
+
+Object oDemoSliders is a cWebView
+    Set piMaxWidth to 700
+    Set psCaption to "Sliders & Tabs"
+    Set pbShowCaption to False
+    
+    Object oCustomerDataDictionary is a cCustomerDataDictionary
+    End_Object
+    
+    Set Main_DD to oCustomerDataDictionary
+    Set Server to oCustomerDataDictionary
+    
+    Object oWebTabContainer is a cWebTabContainer
+        Set pbFillHeight to True
+        Set psCSSClass to "HeaderTab"
+        Set piMinHeight to 485
+        
+        Object oHorizontalPage is a cWebTabPage
+            Set piColumnCount to 10
+            Set psCaption to "Horizontal"
+            
+            Object oSlider1 is a cWebSlider
+                Set psLabel to "Default"
+                Set piColumnSpan to 0
+                Set piSliderValue to 5
+                Set pbShowRange to True
+            End_Object
+            
+            Object oSlider2 is a cWebSlider
+                Set psLabel to "Markers"
+                Set piColumnSpan to 0
+                Set pbShowMarkers to True
+            End_Object
+            
+            Object oSlider3 is a cWebSlider
+                Set psLabel to "Labels"
+                Set piMaxValue to 3
+                Set piMinValue to 1
+                Set piInterval to 1
+                Set pbShowMarkers to False
+                
+                Procedure OnFillLabels
+                    Send AddLabel 1 "Low"
+                    Send AddLabel 2 "Medium"
+                    Send AddLabel 3 "High"
+                End_Procedure
+                
+            End_Object
+            
+            
+            
+            Object oWebTabContainer1 is a cWebTabContainer
+                Set pbFillHeight to True
+                Object oWebTabPage1 is a cWebTabPage
+                    Set psCaption to "Range"
+                    
+                    Object oWebSlider1 is a cWebSlider
+                        Set psLabel to "Range"
+                        Set piMinValue to 0
+                        Set piMaxValue to 100
+                        Set pbRanged to True
+                        Set piFrom to 20
+                        Set piTo to 50
+                        Set pbShowRange to True
+                    End_Object
+                    
+                    Object oWebSlider2 is a cWebSlider
+                        Set psLabel to "Value Range"
+                        Set piMinValue to 0
+                        Set piMaxValue to 100
+                        Set pbRanged to True
+                        Set piFrom to 20
+                        Set piTo to 50
+                        
+                        Set pbShowValue to True
+                    End_Object
+                    
+                    Set piColumnCount to 12
+                End_Object
+                
+                Object oWebTabPage3 is a cWebTabPage
+                    Set psCaption to "Full"
+                    Set piColumnCount to 12
+                    
+                    Object oSlider4 is a cWebSlider
+                        Set psLabel to "Labels & Markers"
+                        Set piMaxValue to 30
+                        Set piMinValue to 10
+                        Set piInterval to 1
+                        Set pbShowMarkers to True
+                        Set pbShowValue to True
+                        Set pbShowRange to True
+                        
+                        Procedure OnFillLabels
+                            Send AddLabel 10 "Ten"
+                            Send AddLabel 20 "Twenty"
+                            Send AddLabel 30 "Thirty"
+                        End_Procedure
+                    End_Object
+                End_Object
+                
+                Object oWebTabPage2 is a cWebTabPage
+                    Set psCaption to "More"
+                    Set piColumnCount to 12
+                    
+                    Object oWebSlider1 is a cWebSlider
+                        Set psLabel to "0 - 100"
+                        Set piMinValue to 0
+                        Set piSliderValue to 50
+                        Set pbShowValue to True
+                        Set piMaxValue to 100
+                        Set pbShowRange to True
+                    End_Object
+                End_Object
+                
+                Object oWebTabPage4 is a cWebTabPage
+                    Set psCaption to "Dynamic"
+                    Set piColumnCount to 12
+                    
+                    Object oDynamicSlider is a cWebSlider
+                        Set psLabel to "Dynamic Labels"
+                        Set piMaxValue to 5
+                        Set piMinValue to 1
+                        Set piInterval to 1
+                        Set pbShowMarkers to False
+                        
+                        Function NumberOfLabelsToShow Returns Integer
+                            Integer iMaxNum
+                            
+                            WebGet piMaxValue to iMaxNum
+                            Function_Return iMaxNum
+                        End_Function
+                        
+                        Procedure OnFillLabels
+                            Integer iNumLabels iLabel
+                            
+                            Get NumberOfLabelsToShow to iNumLabels
+                            For iLabel From 0 to (iNumLabels - 1)
+                                Send AddLabel (iLabel+1) (String(iLabel))
+                            Loop
+                        End_Procedure
+                        
+                    End_Object
+                    
+                    Object oNumberforMaxValueWebCombo is a cWebCombo
+                        Set piColumnSpan to 8
+                        Set psLabel to "Number of values on slider"
+                        Set psValue to 5
+                        
+                        Procedure OnFill
+                            Integer iMax iCount
+                            Forward Send OnFill
+                            
+                            Move 10 to iMax
+                            For iCount From 1 to (iMax -1)
+                                Send AddComboItem (String(iCount + 1)) (String(iCount + 1))
+                            Loop
+                        End_Procedure
+                        
+                    End_Object
+                    
+                    Object oAdjustLabelsWebButton is a cWebButton
+                        Set piColumnSpan to 4
+                        Set psCaption to "Adjust"
+                        Set piColumnIndex to 8
+                        
+                        Procedure OnClick
+                            Integer iMax
+                            
+                            WebGet psValue of oNumberforMaxValueWebCombo to iMax
+                            WebSet piMaxValue of oDynamicSlider to iMax
+                            Send RefillLabels of oDynamicSlider
+                        End_Procedure
+                    End_Object
+                    
+                End_Object
+                
+            End_Object
+            
+        End_Object
+        
+        Object oVerticalPage is a cWebTabPage
+            Set piColumnCount to 10
+            WebSetResponsive piColumnCount rmMobile to 5
+            
+            Set psCaption to "Vertical"
+            
+            Object oLabel1 is a cWebLabel
+                Set piColumnSpan to 1
+                Set psCaption to "Default"
+            End_Object
+            
+            Object oLabel2 is a cWebLabel
+                Set piColumnSpan to 1
+                Set piColumnIndex to 1
+                Set psCaption to "Markers"
+            End_Object
+            
+            Object oLabel3 is a cWebLabel
+                Set piColumnSpan to 3
+                Set piColumnIndex to 2
+                Set psCaption to "Labels"
+            End_Object
+            
+            Object oSlider1 is a cWebSlider
+                Set piColumnSpan to 1
+                Set pbVertical to True
+                Set pbShowLabel to False
+                Set pbFillHeight to True
+            End_Object
+            
+            Object oSlider2 is a cWebSlider
+                Set piColumnSpan to 1
+                Set piColumnIndex to 1
+                Set pbVertical to True
+                Set pbShowLabel to False
+                Set pbShowMarkers to True
+                Set pbFillHeight to True
+            End_Object
+            
+            Object oSlider3 is a cWebSlider
+                Set piMaxValue to 5
+                Set piMinValue to 1
+                Set piInterval to 1
+                Set pbVertical to True
+                Set pbShowLabel to False
+                Set piColumnIndex to 2
+                Set piColumnSpan to 3
+                Set pbFillHeight to True
+                Procedure OnFillLabels
+                    Send AddLabel 1 "First"
+                    Send AddLabel 2 "Second"
+                    Send AddLabel 3 "Third"
+                    Send AddLabel 4 "Fourth"
+                    Send AddLabel 5 "Fifth"
+                End_Procedure
+            End_Object
+        End_Object
+    End_Object
+End_Object
+

@@ -1,0 +1,229 @@
+﻿Use cWebView.pkg
+Use cWebPanel.pkg
+Use cWebForm.pkg
+Use cWebButton.pkg
+Use cWebGroup.pkg
+Use cWebSpacer.pkg
+Use cWebHtmlBox.pkg
+Use cWebMenuGroup.pkg
+Use cWebMenuItem.pkg
+Use cWebLabel.pkg
+Use cOrderHeaderDataDictionary.dd
+Use cCustomerDataDictionary.dd
+Use cSalesPersonDataDictionary.dd
+Use cWebList.pkg
+Use cWebColumn.pkg
+Use cWebHtmlList.pkg
+
+Register_Object oSelectCustomer
+Register_Object oSelectOrder
+Register_Object oZoomOrder
+
+Object oDashboard is a cWebView
+    
+    // DDO Structure
+    //
+    // It is important for the drill-down Navigation interface that we do not
+    // set the Server property to some DDO, because this will affect
+    // constraints in the next view that we navigate to.
+    //
+    // For the navigation and WebHtmlTemplateList 
+    
+    Object oSalesPersonDataDictionary is a cSalesPersonDataDictionary
+    End_Object
+    
+    Object oCustomerDataDictionary is a cCustomerDataDictionary
+    End_Object
+    
+    Object oOrderHeaderDataDictionary is a cOrderHeaderDataDictionary
+        Set DDO_Server to oSalesPersonDataDictionary
+        Set DDO_Server to oCustomerDataDictionary
+    End_Object
+    
+    Send AddDDOStructure oOrderHeaderDataDictionary
+    
+    Set piMaxWidth to 1024
+    Set psCaption to "Dashboard"
+    Set peViewType to vtUndefined
+    
+    Set pbShowCaption to False
+    Set peStateMode to vsmOff   // This hides the dashboard from the URL
+    
+    Object oWebMainPanel is a cWebPanel
+        Set piColumnCount to 24
+        
+        
+        // Main Panel's Responsive Rules
+        WebSetResponsive piColumnCount rmMobile to 1
+        WebSetResponsive piColumnCount rmTabletPortrait to 16
+        
+        Object oTiles_grp is a cWebGroup
+            Set piColumnSpan to 8
+            Set pbShowBorder to False
+            Set pbShowCaption to False
+            Set piColumnCount to 12
+            
+            Set psCSSClass to "TilesGroup"
+            
+            Object oWelcomeTile is a cWebHtmlBox
+                Set piColumnSpan to 6
+                Set psCSSClass to "Tile Light"
+                Set psHtml to '<div class="WebCon_Sizer"><div class="Tile_Title">Welcome</div><div class="Tile_Subtitle">User Name</div></div>'
+                
+                //                Procedure OnLoad
+                //                    Send UpdateHTML ('<div class="WebCon_Sizer">' + ;
+                //                        '<div class="Tile_Title">Welcome</div>' +;
+                //                        '<div class="Tile_Subtitle">' - htmlEncode(psUserName(ghoWebSessionManager)) - '</div>' +;
+                //                        '</div>')
+                //                End_Procedure
+            End_Object
+            
+            Object oFindCustomerTile is a cWebHtmlBox
+                Set pbServerOnClick to True
+                Set piColumnSpan to 6
+                Set piColumnIndex to 6
+                Set psCSSClass to "Tile LightAlternate"
+                Set psHtml to '<div class="WebCon_Sizer" data-ServerOnClick="openview"><div class="Tile_Icon WebIcon_Find"></div><div class="Tile_TextUnderIcon">Customer Query</div></div>'
+                
+                WebRegisterPath ntNavigateForwardCustom oSelectOrdersByCustomer
+                
+                Procedure OnClick String sId String sParam
+                    Send NavigatePath
+                End_Procedure
+            End_Object
+            
+            Object oFindSalesPTile is a cWebHtmlBox
+                Set pbServerOnClick to True
+                Set piColumnSpan to 6
+                Set psCSSClass to "Tile Dark"
+                Set psHtml to '<div class="WebCon_Sizer" data-ServerOnClick="openview"><div class="Tile_Icon WebIcon_FindSalesP"></div><div class="Tile_TextUnderIcon">Sales Person Query</div></div>'
+                
+                WebRegisterPath ntNavigateForwardCustom oSelectSalesPerson
+                
+                Procedure OnClick String sId String sParam
+                    Send NavigatePath
+                End_Procedure
+            End_Object
+            
+            Object oNewOrderTile is a cWebHtmlBox
+                Set pbServerOnClick to True
+                Set piColumnSpan to 6
+                Set piColumnIndex to 6
+                Set psCSSClass to "Tile DarkAlternate"
+                Set psHtml to '<div class="WebCon_Sizer" data-ServerOnClick="openview"><div class="Tile_Icon WebIcon_Add"></div><div class="Tile_TextUnderIcon">Orders Query</div></div>'
+                
+                WebRegisterPath ntNavigateForward oSelectOrder
+                
+                Procedure OnClick String sId String sParam
+                    Send NavigatePath
+                End_Procedure
+            End_Object
+        End_Object
+        
+        Object oLatestActivity_grp is a cWebGroup
+            Set piColumnSpan to 8
+            Set piColumnIndex to 8
+            Set pbShowBorder to False
+            Set pbShowCaption to False
+            Set piColumnCount to 12
+            Set psCSSClass to "LatestActivity"
+            
+            Object oLatestActivity_lbl is a cWebLabel
+                Set psCaption to "Latest Orders"
+                Set piColumnSpan to 0
+                Set psCSSClass to "LabelTitle"
+            End_Object
+
+            Object oLatestActivity_list is a cWebHtmlList
+                Set Server to oOrderHeaderDataDictionary
+                Set psCSSClass to "LatestActivity"
+                Set psHtmlBefore to '<ul>'
+                Set psHtmlTemplate to '<li><div class="FirstLine MinorText">{{oOrderHeader_Order_Date}}</div><div class="MainText">Customer - {{oCustomer_Name}}</div><div class="MinorText">Order {{oOrderHeader_Order_Number}}</div></li>'
+                Set psHtmlAfter to '</ul>'
+                Set piLimitRows to 4
+                Set pbReverseOrdering to True
+                Set pbServerOnRowClick to True
+                
+                Object oOrderHeader_Order_Date is a cWebColumn
+                    Entry_Item OrderHeader.Order_Date
+                    Set psCaption to "Order Date"
+                    Set piWidth to 50
+                End_Object
+            
+                Object oCustomer_Name is a cWebColumn
+                    Entry_Item Customer.Name
+                    Set psCaption to "Customer Name"
+                    Set piWidth to 50
+                End_Object
+            
+                Object oOrderHeader_Order_Number is a cWebColumn
+                    Entry_Item OrderHeader.Order_Number
+                    Set psCaption to "Order Number"
+                    Set piWidth to 50
+                End_Object
+                
+                WebRegisterPath ntNavigateForward oZoomOrder
+                
+                Procedure OnRowClick String sRowID
+                    Send NavigatePath
+                End_Procedure
+                
+                Procedure OnGetNavigateForwardData tWebNavigateData  ByRef NavigateData Handle hoToView
+                    Move True to NavigateData.bReadOnly
+                End_Procedure
+            End_Object
+        End_Object
+
+        Object oRecentCustomers_grp is a cWebGroup
+            Set piColumnSpan to 8
+            Set pbShowBorder to False
+            Set pbShowCaption to False
+            Set piColumnCount to 12
+            Set piColumnIndex to 16
+            Set psCSSClass to "RecentList"
+            
+            Object oRecentCustomers_lbl is a cWebLabel
+                Set psCaption to "New Customers"
+                Set piColumnSpan to 0
+                Set psCSSClass to "LabelTitle"
+            End_Object
+
+            Object oRecentCustomers_list is a cWebHtmlList
+                Set Server to oCustomerDataDictionary
+                Set psHtmlBefore to '<ul>'
+                Set psHtmlTemplate to '<li><div>{{oCustomer_Name1}}</div></li>'
+                Set psHtmlAfter to '</ul>'
+                Set piLimitRows to 8
+                Set pbServerOnRowClick to True
+                Set piOrdering to 1
+                Set pbReverseOrdering to True
+                
+                Object oCustomer_Name1 is a cWebColumn
+                    Entry_Item Customer.Name
+                    Set psCaption to "Customer Name"
+                    Set piWidth to 50
+                End_Object
+                
+                WebRegisterPath ntNavigateForward oZoomCustomer
+
+                Procedure OnRowClick String sRowID
+                    Send NavigatePath
+                End_Procedure
+
+                Procedure OnGetNavigateForwardData tWebNavigateData  ByRef NavigateData Handle hoToView
+                    Move True to NavigateData.bReadOnly
+                End_Procedure
+            End_Object
+            
+        End_Object
+        
+    End_Object
+    
+    Procedure OnBeforeShow
+        // Each time this view is shown, we will update the appropriate information.
+        Send FindFromTop of oLatestActivity_list
+        Send FindFromTop of oRecentCustomers_list
+    End_Procedure
+    
+End_Object
+

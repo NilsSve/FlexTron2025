@@ -1,0 +1,91 @@
+﻿Use cWebView.pkg
+Use cWebLabel.pkg
+Use cWebButton.pkg
+
+Object oDemoCSSClasses is a cWebView
+    Set piMaxWidth to 1024
+    Set psCaption to "Demo CSS Classes"
+    Set pbShowCaption to False
+    Set piColumnCount to 16
+    
+    // CSS Class: LabelCaption
+    // This CSS Class is designed to be used in cWebLabel
+    Object oCaption_lbl is a cWebLabel
+        Set psCaption to "Extended CSS Class Demo"
+        Set psCSSClass to "LabelCaption"
+        Set piColumnSpan to 0
+    End_Object
+    
+    // CSS Class: LabelDetail
+    // This CSS Class is designed to be used in cWebLabel
+    Object oDetail_lbl is a cWebLabel
+        Set psCaption to "This view demonstrates the use of some special CSS classes which belong to the 'Df_Flat_Touch' theme. You can use these CSS classes to modify the default appearance of a control by setting the object's psCSSClass property."
+        Set psCSSClass to "LabelDetail"
+        Set piColumnSpan to 14
+        Set piColumnIndex to 1
+    End_Object
+    
+    Object oInfo_btn is a cWebButton
+        Set piColumnSpan to 3
+        Set psCaption to "info"
+        Set psCSSClass to "WebIcon_Info"
+        Set piColumnIndex to 2
+        
+        Procedure OnClick
+            Send ShowInfoBox "Info button was clicked!" "Button Click"
+        End_Procedure
+        
+        WebSetResponsive psCaption rmMobile to ""
+    End_Object
+    
+    Object oAdd_btn is a cWebButton
+        Set piColumnSpan to 3
+        Set psCaption to "add"
+        Set psCSSClass to "WebIcon_Add"
+        Set piColumnIndex to 5
+        
+        Procedure OnClick
+            Send ShowInfoBox "Add button was clicked!" "Button Click"
+        End_Procedure
+        
+        WebSetResponsive psCaption rmMobile to ""
+    End_Object
+    
+    Object oSave_btn is a cWebButton
+        Set piColumnSpan to 3
+        Set psCaption to "save"
+        Set psCSSClass to "WebSaveMenuItem"
+        Set piColumnIndex to 8
+        
+        Procedure OnClick
+            Send ShowInfoBox "Save button was clicked!" "Button Click"
+        End_Procedure
+        
+        WebSetResponsive psCaption rmMobile to ""
+    End_Object
+    
+    Object oDelete_btn is a cWebButton
+        Set piColumnSpan to 3
+        Set psCaption to "delete"
+        Set psCSSClass to "WebIcon_Delete"
+        Set piColumnIndex to 11
+        
+        Procedure OnClick
+            Send ShowInfoBox "Delete button was clicked!" "Button Click"
+        End_Procedure
+        
+        WebSetResponsive psCaption rmMobile to ""
+    End_Object
+    
+    Object oDetail2_lbl is a cWebLabel
+        Set psCaption to "For more information, refer to the 'Developing Web Applications' topics: 'Extended CSS Class Styles' and 'Font Icon CSS Class Styles' in the Help System."
+        Set psCSSClass to "LabelDetail"
+        Set piColumnSpan to 14
+        Set piColumnIndex to 1
+    End_Object
+    
+End_Object
+
+
+
+
