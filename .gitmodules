@@ -1,0 +1,8 @@
+[submodule "DataFlexReportsDemoLibrary"]
+	path = DataFlexReportsDemoLibrary
+	url = https://github.com/NilsSve/DataFlexReportsDemoLibrary
+	branch = main
+[submodule "Libraries/DataFlex Reports Demo Library"]
+	path = Libraries/DataFlex Reports Demo Library
+	url = https://github.com/NilsSve/DataFlexReportsDemoLibrary
+	branch = main
